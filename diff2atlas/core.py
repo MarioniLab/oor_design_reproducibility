@@ -103,10 +103,13 @@ def nhood_confidence(adata: AnnData,
         nhood_scores = np.hstack([nhood_scores, nh_score])
 
     # Make anndata object for nhoods x samples if missing
-    try:
-        adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
-    except KeyError:
+    if 'nhood_adata' not in adata.uns:
         _add_nhoods_adata(adata, sample_col)
+        adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
+    elif adata.uns['nhood_adata'].uns['sample_col'] != sample_col:
+        _add_nhoods_adata(adata, sample_col)
+        adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
+    else:
         adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
 
 
