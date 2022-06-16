@@ -208,6 +208,8 @@ def make_design(adata: AnnData,
         sample_obs = pd.concat([sample_obs, sample_obs_continuous], axis=1)
     nhood_adata.var = sample_obs.loc[nhood_adata.var_names].copy()
     nhood_adata.varm['design_matrix'] = design_mat.loc[nhood_adata.var_names].copy()
+    nhood_adata.varm['design_matrix'] = nhood_adata.varm['design_matrix'].astype(
+        'float')
     adata.uns['nhood_adata'] = nhood_adata.copy()
     # return(design_mat)
 
