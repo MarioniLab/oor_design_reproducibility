@@ -12,14 +12,14 @@ from statsmodels.stats.multitest import multipletests
 from sklearn.metrics import roc_curve, auc
 
 
-def _check_inputs(adata: AnnData) -> bool:
-    """
-    Checks that all the required inputs are there
-    - Cell-level confidence metric (stored in `adata.obs['confidence']`)
-    - Common dimensions for controls and condition samples (stored in `adata.obsm['X_dims']`)
-    - Assignment of cells to sample/donors (stored in `adata.obs['sample_id']`)
-    - Assignment of cells to `adata.obsm['cell_nhoods']`, binary of dimensions cells x nhoods
-    """
+# def _check_inputs(adata: AnnData) -> bool:
+#     """
+#     Checks that all the required inputs are there
+#     - Cell-level confidence metric (stored in `adata.obs['confidence']`)
+#     - Common dimensions for controls and condition samples (stored in `adata.obsm['X_dims']`)
+#     - Assignment of cells to sample/donors (stored in `adata.obs['sample_id']`)
+#     - Assignment of cells to `adata.obsm['cell_nhoods']`, binary of dimensions cells x nhoods
+#     """
 
 # --- Assign cells to populations of similar cells --- #
 
@@ -28,7 +28,9 @@ def make_cell_nhoods(adata: AnnData,
                      method: str,
                      #  X_dims: str,
                      neighbors_key: str = None,
-                     clusters_key: str = None) -> None:
+                     clusters_key: str = None,
+                     key_added: str = None
+                     ) -> None:
     """Assign cells to populations of similar cells in the phenotypic space defined by `X_dims`
 
    Params:
@@ -38,17 +40,22 @@ def make_cell_nhoods(adata: AnnData,
    - method: if `KNN`, compute milo neighbourhoods based on graph stored in `adata.obsp['neighbors_key']`, if `clusters` assign cells to clusters stored in `adata.obs['clusters_keys']`
    - neighbors_key: only used if `method = "KNN"`, which key in `adata.obsp` to use for assignment of cells to neighbourhoods
    - clusters_key: only used if `method = "clusters"`, which key in `adata.obsp` to use for assignment of cells to clusters
+   - key_added: If not specified, the neighbourhoods are stored in .obsm['nhoods']. If specified, they are stored as .obsm[key_added+'_nhoods']
 
    Returns:
    -------
-   None, adds in place `adata.obsm['cell_nhoods']`, a binary sparse matrix of dimensions cells x neighbourhoods
+   None, adds in place nhood matric to `adata.obsm`, a binary sparse matrix of dimensions cells x neighbourhoods
     """
     if method == 'clusters':
-        _make_nhoods_clusters(adata, clusters_key=clusters_key)
+        nhoods_mat = _make_nhoods_clusters(adata, clusters_key=clusters_key)
     elif method == 'KNN':
         None
     else:
         raise ValueError("method must be either 'KNN' or 'clusters'")
+    if key_added is None:
+        adata.obsm['nhoods'] = nhoods_mat
+    else:
+        adata.obsm[key_added + '_nhoods'] = nhoods_mat
 
 
 def _make_nhoods_KNN(adata: AnnData, neighbors_key: str = None):
@@ -62,30 +69,40 @@ def _make_nhoods_clusters(adata: AnnData, clusters_key: str = None):
         clusters = adata.obs[clusters_key]
     except KeyError:
         raise ValueError('clusters_key is not a column in adata.obs')
-    adata.obsm['cell_nhoods'] = csr_matrix(pd.get_dummies(clusters).values)
+    return(csr_matrix(pd.get_dummies(clusters).values))
 
 
 # --- Compute confidence metric per sample/donor --- #
 
 def nhood_confidence(adata: AnnData,
                      confidence_col: str,
-                     sample_col: str) -> None:
+                     sample_col: str,
+                     nhoods_key: str = None,
+                     impute_missing: bool = True
+                     ) -> None:
     """Aggregate cell-level confidence by cell neighourhood and sample
     Params:
     ------
     - adata: AnnData object
     - confidence_col: column in `adata.obs` storing cell-level confidence statistic. Higher values correspond to higher confidence in reference mapping.
     - sample_col: column in `adata.obs` storing assignment of cells to samples
+    - nhoods_key: If not specified, nhood_confidence uses .obsm['nhoods'] (default storage place for make_cell_nhoods).
+        If specified, nhood_confidence uses .obsm[key_added + '_nhoods']
+    - impute_missing: boolean indicating whether confidence for missing samples (i.e. where there are no cells in the nhood) should be set to 0 (default: True) 
 
     Returns:
     -------
     None, adds in place `adata.uns['nhood_adata']` of dimensions nhoods x samples storing cell counts in .X and confidence in `layers['confidence']` 
     """
+    if nhoods_key is None:
+        nhoods_key = 'nhoods'
+    else:
+        nhoods_key = nhoods_key + '_nhoods'
     try:
-        nhood_mat = adata.obsm["cell_nhoods"].copy()  #  cells x nhoods
+        nhood_mat = adata.obsm[nhoods_key].copy()  #  cells x nhoods
     except:
         raise KeyError(
-            "adata.obsm['cell_nhoods'] not found, please run make_cell_nhoods first")
+            f"adata.obsm['{nhoods_key}'] not found, please run make_cell_nhoods first")
     try:
         sample_dummies = pd.get_dummies(adata.obs[sample_col]).values
     except:
@@ -99,14 +116,15 @@ def nhood_confidence(adata: AnnData,
         nh_score = nhood_mat[ixs, :].T.dot(
             csr_matrix(adata.obs.loc[ixs, confidence_col]).T).toarray()
         nh_score = nh_score/np.array(nhood_mat[ixs, :].T.sum(1))
-        nh_score[np.isnan(nh_score)] = 0
+        if impute_missing:
+            nh_score[np.isnan(nh_score)] = 0
         nhood_scores = np.hstack([nhood_scores, nh_score])
 
     # Make anndata object for nhoods x samples if missing
     if 'nhood_adata' not in adata.uns:
-        _add_nhoods_adata(adata, sample_col)
+        _add_nhoods_adata(adata, sample_col, nhoods_key)
         adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
-    elif adata.uns['nhood_adata'].uns['sample_col'] != sample_col:
+    elif adata.uns['nhood_adata'].uns['sample_col'] != sample_col or adata.uns['nhood_adata'].uns['nhoods_key'] != nhoods_key:
         _add_nhoods_adata(adata, sample_col)
         adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
     else:
@@ -116,11 +134,14 @@ def nhood_confidence(adata: AnnData,
 def _add_nhoods_adata(
     adata: AnnData,
     sample_col: str,
+    nhoods_key: str = 'nhoods'
 ):
     '''
     - adata
     - sample_col: string, column in adata.obs that contains sample information 
     (what should be in the columns of the nhoodCount matrix)
+    - nhoods_key: If not specified, nhood_confidence uses .obsm['nhoods'] (default storage place for make_cell_nhoods).
+        If specified, nhood_confidence uses .obsm[key_added + '_nhoods']
 
     Returns: None
     Updated adata.uns slot to contain adata.uns["nhood_adata"], where:
@@ -130,16 +151,16 @@ def _add_nhoods_adata(
     sample in each neighbourhood
     '''
     try:
-        nhoods = adata.obsm["cell_nhoods"]
+        nhoods = adata.obsm[nhoods_key]
     except KeyError:
         raise KeyError(
-            'Cannot find "cell_nhoods" slot in adata.obsm -- please run make_cell_nhoods'
+            f'Cannot find {nhoods_key} slot in adata.obsm -- please run make_cell_nhoods'
         )
     #  Make nhood abundance matrix
     sample_dummies = pd.get_dummies(adata.obs[sample_col])
     all_samples = sample_dummies.columns
     sample_dummies = csr_matrix(sample_dummies.values)
-    nhood_count_mat = adata.obsm["cell_nhoods"].T.dot(sample_dummies)
+    nhood_count_mat = adata.obsm[nhoods_key].T.dot(sample_dummies)
     nhood_var = pd.DataFrame(index=all_samples)
     nhood_adata = anndata.AnnData(X=nhood_count_mat, var=nhood_var)
     nhood_adata.uns["sample_col"] = sample_col
@@ -148,6 +169,7 @@ def _add_nhoods_adata(
         nhood_adata.obs["index_cell"] = adata.obs_names[adata.obs["nhood_ixs_refined"] == 1]
         nhood_adata.obs["kth_distance"] = adata.obs.loc[adata.obs["nhood_ixs_refined"]
                                                         == 1, "nhood_kth_distance"].values
+    nhood_adata.uns['nhoods_key'] = nhoods_key
     adata.uns["nhood_adata"] = nhood_adata
 
 
@@ -188,6 +210,8 @@ def make_design(adata: AnnData,
         sample_obs_categorical = adata.obs[[sample_col] + categorical_covariates].drop_duplicates(
         ).reset_index(drop=True).set_index(sample_col)
         assert sample_obs_categorical.index.is_unique, 'Sample covariates are not unique.'
+        sample_obs_categorical = sample_obs_categorical.apply(
+            lambda x: x.astype('category'))
         # Make design matrix
         design_mat_categorical = pd.get_dummies(
             sample_obs_categorical[categorical_covariates])
@@ -252,12 +276,12 @@ def test_confidence(adata: AnnData,
         group_index = test_vec == 1
         rest_index = test_vec == 0
 
-        mean_group = confidence_mat[:, group_index].mean(1)
-        var_group = confidence_mat[:, group_index].var(1)
+        mean_group = np.nanmean(confidence_mat[:, group_index], axis=1)
+        var_group = np.nanvar(confidence_mat[:, group_index], axis=1)
         ns_group = sum(group_index)
 
-        mean_rest = confidence_mat[:, rest_index].mean(1)
-        var_rest = confidence_mat[:, rest_index].var(1)
+        mean_rest = np.nanmean(confidence_mat[:, rest_index], axis=1)
+        var_rest = np.nanvar(confidence_mat[:, rest_index], axis=1)
         ns_rest = sum(rest_index)
 
         scores, pvals = stats.ttest_ind_from_stats(
@@ -291,7 +315,8 @@ def test_confidence(adata: AnnData,
 
 def _nhood_AUROC(test_vec, nhood_confidence):
     '''Compute AUROC for single neighbourhood'''
-    fpr, tpr, _ = roc_curve(test_vec, nhood_confidence)
+    nan_mask = ~np.isnan(nhood_confidence)
+    fpr, tpr, _ = roc_curve(test_vec[nan_mask], nhood_confidence[nan_mask])
     AUROC = auc(fpr, tpr)
     return(AUROC)
 
