@@ -8,8 +8,8 @@
 # import matplotlib.pyplot as plt
 # from matplotlib import rcParams
 # from matplotlib.colors import LinearSegmentedColormap
-# import numpy as np
-# import pandas as pd
+import numpy as np
+import pandas as pd
 # import scanpy as sc
 # import numpy.random as random
 # import scipy
@@ -19,7 +19,7 @@
 # import scvelo
 # from scipy.sparse import csr_matrix, issparse
 # from typing import Union, Optional, Sequence, Any, Mapping, List, Tuple
-# from anndata import AnnData
+from anndata import AnnData
 # import torch
 
 from collections import Counter
@@ -30,7 +30,10 @@ from sklearn.neighbors import KNeighborsTransformer
 # As implemented in https://github.com/LungCellAtlas/mapping_data_to_the_HLCA/blob/main/scripts/scarches_label_transfer.py
 
 
-def weighted_knn_trainer(train_adata, train_adata_emb, n_neighbors=50):
+def weighted_knn_trainer(
+        train_adata: AnnData,
+        train_adata_emb: str,
+        n_neighbors: int = 50):
     """Trains a weighted KNN classifier on ``train_adata``.
     Parameters
     ----------
@@ -133,16 +136,12 @@ def weighted_knn_transfer(
     for i in range(len(weights)):
         for j in cols:
             y_train_labels = ref_adata_obs[j].values
-            unique_labels = np.unique(y_train_labels[top_k_indices[i]])
-            best_label, best_prob = None, 0.0
-            for candidate_label in unique_labels:
-                candidate_prob = weights[
-                    i, y_train_labels[top_k_indices[i]] == candidate_label
-                ].sum()
-                if best_prob < candidate_prob:
-                    best_prob = candidate_prob
-                    best_label = candidate_label
+            counter = Counter(y_train_labels[top_k_indices[i]])
+            best_label = max(counter, key=counter.get)
+            best_prob = weights[i, y_train_labels[top_k_indices[i]]
+                                == best_label].sum()
 
+            # Annotating low probability as unknown
             if pred_unknown:
                 if best_prob >= threshold:
                     pred_label = best_label
@@ -151,12 +150,7 @@ def weighted_knn_transfer(
             else:
                 pred_label = best_label
 
-            if mode == "package":
-                uncertainties.iloc[i][j] = (max(1 - best_prob, 0))
-
-            else:
-                raise Exception("Inquery Mode!")
-
+            uncertainties.iloc[i][j] = (max(1 - best_prob, 0))
             pred_labels.iloc[i][j] = (pred_label)
 
     print("finished!")
