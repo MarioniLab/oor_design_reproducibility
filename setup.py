@@ -21,7 +21,7 @@ setuptools.setup(
         "scipy",
         "numpy",
         "matplotlib",
-        "sklearn"
+        "sklearn",
         "pynndescent"
     ],
     zip_safe=False,
