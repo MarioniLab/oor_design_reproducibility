@@ -212,6 +212,13 @@ def inference_posterior_distance(
     return(dmat.mean(1))
 
 
+def _gauss_kernel(dist_nns):
+    # compute standard deviation
+    std_d = np.sqrt(sum(np.sqrt(dist_nns))/dist_nns.shape[0])
+    # apply gaussian kernel
+    adj_dist_nns = np.exp(-dist_nns/np.square(2/std_d))
+    return(adj_dist_nns)
+
 ## --- old code --- ##
 
 # def _trueVSimputed_cosine(
