@@ -44,7 +44,7 @@ def train_scVI(
 
     model_train.train()
     if outfile is not None:
-        model_train.save(outfile, overwrite=True)
+        model_train.save(outfile, save_anndata=True, overwrite=True)
     return(model_train)
 
 
@@ -63,6 +63,8 @@ def fit_scVI(
     )
 
     vae_q.train(max_epochs=200, plan_kwargs=dict(weight_decay=0.0))
+    if outfile is not None:
+        vae_q.save(outfile, save_anndata=True, overwrite=True)
     return(vae_q)
 
 

@@ -1,13 +1,3 @@
-# import sys
-# import os
-# import scvi
-# import anndata
-# import matplotlib
-# import seaborn as sns
-# from matplotlib import colors
-# import matplotlib.pyplot as plt
-# from matplotlib import rcParams
-# from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -22,7 +12,6 @@ import sklearn.metrics
 from collections import Counter
 from sklearn.neighbors import KNeighborsTransformer
 from pynndescent import NNDescent
-import pynndescent
 import pickle as pkl
 
 
@@ -103,7 +92,10 @@ def weighted_knn_transfer_uncertainty(
         uncertainties.iloc[i] = (max(1 - best_prob, 0))
         pred_labels.iloc[i] = (best_label)
 
-    return pred_labels, uncertainties
+    if return_labels:
+        return(uncertainties, pred_labels)
+    else:
+        return(uncertainties)
 
 
 def trueVSpred_gex_cosine(
