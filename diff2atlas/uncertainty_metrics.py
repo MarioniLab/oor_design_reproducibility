@@ -64,7 +64,7 @@ def weighted_knn_transfer_uncertainty(
                 f'{model} should be either a trained NNDescent object or a path to a pickle file')
 
     if isinstance(train_labels, pd.Series):
-        y_train_labels = train_labels.tolist()
+        y_train_labels = train_labels.values
     else:
         y_train_labels = train_labels
 
