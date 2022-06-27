@@ -22,6 +22,7 @@ setuptools.setup(
         "numpy",
         "matplotlib",
         "sklearn"
+        "pynndescent"
     ],
     zip_safe=False,
     python_requires=">=3.6"
