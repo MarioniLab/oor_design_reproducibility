@@ -123,7 +123,7 @@ def trueVSpred_gex_cosine(
         vae = model
     elif type(model) == str:
         try:
-            vae = scvi.model.SCVI.load(model, adata=query_adata)
+            vae = scvi.model.SCVI.load(model)
         except:
             raise FileNotFoundError(
                 f'{model} should be either a trained scvi.model.SCVI object or a path to a model dir')
