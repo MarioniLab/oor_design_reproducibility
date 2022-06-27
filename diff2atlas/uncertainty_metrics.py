@@ -31,7 +31,7 @@ import pickle as pkl
 
 
 def weighted_knn_transfer_uncertainty(
-    model: Union(NNDescent, str),
+    model: Union[NNDescent, str],
     query_adata: AnnData,
     train_labels,
     use_rep: str = 'X_scVI',
@@ -107,7 +107,7 @@ def weighted_knn_transfer_uncertainty(
 
 
 def trueVSpred_gex_cosine(
-    model: Union(scvi.model.SCVI, str),
+    model: Union[scvi.model.SCVI, str],
     query_adata: AnnData,
     n_samples=50,
     seed: int = 42,
