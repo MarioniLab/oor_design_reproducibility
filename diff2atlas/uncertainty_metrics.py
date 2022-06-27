@@ -193,7 +193,7 @@ def inference_posterior_distance(
     Z_dims = vae.get_latent_representation()
 
     # Sample latent dims
-    scdl = vae._make_data_loader()
+    scdl = vae._make_data_loader(adata=vae.adata)
 
     for tensors in scdl:
         inference_kwargs = dict(n_samples=n_samples)
