@@ -131,7 +131,7 @@ def trueVSpred_gex_cosine(
     if 'log1p' not in query_adata.uns.keys():
         sc.pp.normalize_per_cell(query_adata)
         sc.pp.log1p(query_adata)
-    X_true = query_adata.X.copy()
+    X_true = query_adata[vae.adata.var_names].X.copy()
 
     scvi.settings.seed = seed
     post_sample = vae.posterior_predictive_sample(n_samples=n_samples)
