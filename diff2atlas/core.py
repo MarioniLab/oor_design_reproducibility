@@ -10,6 +10,8 @@ from statsmodels.stats.multitest import multipletests
 
 
 from sklearn.metrics import roc_curve, auc
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
 
 
 # def _check_inputs(adata: AnnData) -> bool:
@@ -78,7 +80,8 @@ def nhood_confidence(adata: AnnData,
                      confidence_col: str,
                      sample_col: str,
                      nhoods_key: str = None,
-                     impute_missing: bool = True
+                     impute_missing: bool = True,
+                     min_cells: int = 1
                      ) -> None:
     """Aggregate cell-level confidence by cell neighourhood and sample
     Params:
@@ -88,11 +91,12 @@ def nhood_confidence(adata: AnnData,
     - sample_col: column in `adata.obs` storing assignment of cells to samples
     - nhoods_key: If not specified, nhood_confidence uses .obsm['nhoods'] (default storage place for make_cell_nhoods).
         If specified, nhood_confidence uses .obsm[key_added + '_nhoods']
-    - impute_missing: boolean indicating whether confidence for missing samples (i.e. where there are no cells in the nhood) should be set to 0 (default: True) 
+    - impute_missing: boolean indicating whether confidence for missing samples (i.e. where there are no cells in the nhood) should be set to 0 (default: True)
+    - min_cells: integer indicating the minimum number of cells per sample to compute mean confidence (default: 1)
 
     Returns:
     -------
-    None, adds in place `adata.uns['nhood_adata']` of dimensions nhoods x samples storing cell counts in .X and confidence in `layers['confidence']` 
+    None, adds in place `adata.uns['nhood_adata']` of dimensions nhoods x samples storing cell counts in .X and confidence in `layers['confidence']`
     """
     if nhoods_key is None:
         nhoods_key = 'nhoods'
@@ -129,6 +133,9 @@ def nhood_confidence(adata: AnnData,
         adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
     else:
         adata.uns['nhood_adata'].layers['confidence'] = nhood_scores
+    if min_cells > 1:
+        adata.uns['nhood_adata'].layers['confidence'][adata.uns['nhood_adata'].X.toarray(
+        ) < min_cells] = np.nan
 
 
 def _add_nhoods_adata(
@@ -138,7 +145,7 @@ def _add_nhoods_adata(
 ):
     '''
     - adata
-    - sample_col: string, column in adata.obs that contains sample information 
+    - sample_col: string, column in adata.obs that contains sample information
     (what should be in the columns of the nhoodCount matrix)
     - nhoods_key: If not specified, nhood_confidence uses .obsm['nhoods'] (default storage place for make_cell_nhoods).
         If specified, nhood_confidence uses .obsm[key_added + '_nhoods']
@@ -237,6 +244,44 @@ def make_design(adata: AnnData,
     adata.uns['nhood_adata'] = nhood_adata.copy()
     # return(design_mat)
 
+# --- Filter nhoods ---
+
+
+def highly_variable_nhoods(adata: AnnData):
+    '''
+    Find neighbourhoods with highly variable confidence scores
+
+    Params:
+    ------
+    - adata: AnnData object
+
+    Returns:
+    -------
+    None, adds in place adata.uns['nhood_adata'].obs['highly_variable']
+    '''
+    try:
+        nhood_adata = adata.uns['nhood_adata'].copy()
+    except:
+        raise ValueError(
+            "adata.uns['nhood_adata'] not found -- please run nhood_confidence first")
+
+    try:
+        confidence_mat = nhood_adata.layers['confidence'].copy()
+    except:
+        raise ValueError(
+            "adata.uns['nhood_adata'].layers['confidence'] not found -- please run nhood_confidence first")
+
+    nhood_conf_var = np.nanvar(nhood_adata.layers['confidence'], axis=1)
+    nhood_conf_mean = np.nanmean(nhood_adata.layers['confidence'], axis=1)
+
+    lowess = sm.nonparametric.lowess
+    z = lowess(nhood_conf_var, nhood_conf_mean)
+    # Keep neighbourhoods with std higher than expected by the mean
+    nhood_adata.obs['confidence_mean'] = nhood_conf_mean
+    nhood_adata.obs['confidence_var'] = nhood_conf_var
+    nhood_adata.obsm['confidence_var_lowess'] = z
+    nhood_adata.obs['highly_variable'] = nhood_conf_var > z[:, 1]
+    adata.uns['nhood_adata'] = nhood_adata.copy()
 
 # --- Test for differences in uncertainties ---
 
@@ -244,14 +289,20 @@ def make_design(adata: AnnData,
 def test_confidence(adata: AnnData,
                     test_covariate: str,
                     method: str,
-                    ref_level: str = None) -> None:
+                    ref_level: str = None,
+                    alpha: float = 0.05,
+                    use_highly_variable: bool = False
+                    ) -> None:
     """Test for differences in confidence statistic between condition and controls
 
     Params:
     ------
     - adata: AnnData object
     - test_covariate: which covariate stores the condition of interest 
-    - method: if 'AUROC' replicates are ignored, if 't-test' a difference in means is used 
+    - method: if 'AUROC' replicates are ignored, if 't-test' a difference in means is used,
+    if 'OLS' also 
+    - alpha: signif thresh for uncorrected pvals (used for BH correction in OLS and t-test)
+    - use_highly_variable: boolean indicating whether the test should be performed only on highly variable nhoods 
     """
     try:
         nhood_adata = adata.uns['nhood_adata'].copy()
@@ -265,12 +316,31 @@ def test_confidence(adata: AnnData,
         raise ValueError(
             "adata.uns['nhood_adata'].layers['confidence'] not found -- please run nhood_confidence first")
 
+    if use_highly_variable:
+        keep_nhoods = nhood_adata.obs['highly_variable'].values
+        confidence_mat = confidence_mat[keep_nhoods, :].copy()
+    else:
+        keep_nhoods = np.ones(nhood_adata.n_obs, dtype=bool)
+
     test_vec = _get_test_column(adata, test_covariate, ref_level=ref_level)
+
+    nhood_adata.obs['confidence_test_statistic'] = np.nan
+    nhood_adata.obs['confidence_test_pvals'] = np.nan
+    nhood_adata.obs['confidence_test_adj_pvals'] = np.nan
 
     if method == 'AUROC':
         AUROCs = np.apply_along_axis(
             lambda x: _nhood_AUROC(test_vec, x), 1, confidence_mat)
-        nhood_adata.obs['confidence_test_statistic'] = AUROCs
+        conf_stat = AUROCs
+        pvalues = None
+        fdr = None
+
+    elif method == 'OLS':
+        outs = np.apply_along_axis(
+            lambda x: _nhood_OLS(test_vec, x), 1, confidence_mat)
+        conf_stat = outs[:, 0]
+        pvalues = outs[:, 1]
+        pvalues[np.isnan(outs[:, 0])] = np.nan
 
     elif method == 't-test':
         group_index = test_vec == 1
@@ -284,7 +354,7 @@ def test_confidence(adata: AnnData,
         var_rest = np.nanvar(confidence_mat[:, rest_index], axis=1)
         ns_rest = sum(rest_index)
 
-        scores, pvals = stats.ttest_ind_from_stats(
+        conf_stat, pvalues = stats.ttest_ind_from_stats(
             mean1=mean_group,
             std1=np.sqrt(var_group),
             nobs1=ns_group,
@@ -293,22 +363,28 @@ def test_confidence(adata: AnnData,
             nobs2=ns_rest,
             equal_var=False,  # Welch's
         )
-        pvals[np.isnan(pvals)] = 1
-
-        # BH correction
-        _, pvals_adj, _, _ = multipletests(
-            pvals, alpha=0.05, method='fdr_bh'
-        )
-
-        nhood_adata.obs['confidence_test_statistic'] = scores
-        nhood_adata.obs['confidence_test_pvals'] = pvals
-        nhood_adata.obs['confidence_test_adj_pvals'] = pvals_adj
     else:
-        raise ValueError("method must be either 'AUROC' or 't-test'")
+        raise ValueError("method must be 'AUROC', 'OLS' or 't-test'")
 
+    nhood_adata.obs.loc[keep_nhoods, 'confidence_test_statistic'] = conf_stat
+
+    # Multiple testing correction
+    if pvalues is not None:
+        nhood_adata.obs.loc[keep_nhoods,
+                            'confidence_test_pvals'] = pvalues.copy()
+        pvalues = nhood_adata.obs['confidence_test_pvals'].values.copy()
+        keep_nhoods = ~np.isnan(pvalues)
+        p_rank = stats.rankdata(pvalues[keep_nhoods])
+        fdr = pvalues[keep_nhoods] * len(pvalues[keep_nhoods]) / p_rank
+        fdr[fdr > 1] = 1
+
+        nhood_adata.obs.loc[keep_nhoods,
+                            "confidence_test_adj_pvals"] = fdr
     # Save params
     nhood_adata.uns['test_confidence'] = {
-        'method': method, 'test_covariate': test_covariate, 'ref_level': ref_level}
+        'method': method,
+        'test_covariate': test_covariate,
+        'ref_level': np.where(ref_level is not None, ref_level, nhood_adata.var[test_covariate].cat.categories[0]).flatten()[-1]}
 
     adata.uns['nhood_adata'] = nhood_adata.copy()
 
@@ -319,6 +395,20 @@ def _nhood_AUROC(test_vec, nhood_confidence):
     fpr, tpr, _ = roc_curve(test_vec[nan_mask], nhood_confidence[nan_mask])
     AUROC = auc(fpr, tpr)
     return(AUROC)
+
+
+def _nhood_OLS(test_vec, nhood_confidence):
+    '''Compute OLS regression for single neighbourhood'''
+    nan_mask = ~np.isnan(nhood_confidence)
+    y = nhood_confidence[nan_mask]
+    X = test_vec[nan_mask]
+    # X = test_vec[nan_mask].reshape(-1, 1)
+    coef, _, _, pval, _ = stats.linregress(X, y)
+    # ols = LinearRegression().fit(X, y)
+    # coef = ols.coef_[0]
+    # X = sm.add_constant(X)
+    # pval = sm.OLS(y, X).fit().summary2().tables[1]['P>|t|'][0]
+    return(coef, pval)
 
 
 def _get_test_column(adata, test_covariate, ref_level=None):

@@ -4,6 +4,7 @@ import anndata
 import scanpy as sc
 import pandas as pd
 import numpy as np
+import matplotlib
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -77,6 +78,7 @@ def plot_nhood_graph(
     use_nhood_index: bool = False,
     min_size=10,
     plot_edges=False,
+    nhoods_key: str = None,
     **kwargs
 ):
     '''
@@ -103,6 +105,7 @@ def plot_nhood_graph(
 
 def _build_nhood_graph(adata: AnnData,
                        basis: str = "X_umap",
+                       nhoods_key: str = None,
                        use_nhood_index: bool = False):
     '''
     Build graph of neighbourhoods used for visualization on embedding
@@ -111,17 +114,37 @@ def _build_nhood_graph(adata: AnnData,
     - adata: AnnData object
     - basis: string indicating the name of the obsm basis to use to use for layout of neighbourhoods (key in `adata.obsm`)
     '''
+    if nhoods_key is None:
+        nhoods_key = 'nhoods'
     # Add embedding positions
     if use_nhood_index:
         adata.uns["nhood_adata"].obsm["X_nhood_graph"] = adata[adata.obs["nhood_ixs_refined"] == 1].obsm[basis]
     else:
-        adata.uns["nhood_adata"].obsm["X_nhood_graph"] = adata.obsm['cell_nhoods'].T.dot(
-            adata.obsm[basis])/adata.obsm['cell_nhoods'].T.sum(1)
+        adata.uns["nhood_adata"].obsm["X_nhood_graph"] = adata.obsm[nhoods_key].T.dot(
+            adata.obsm[basis])/adata.obsm[nhoods_key].T.sum(1)
+        adata.uns["nhood_adata"].obsm["X_nhood_graph"] = np.array(
+            adata.uns["nhood_adata"].obsm["X_nhood_graph"])
     # Add nhood size
     adata.uns["nhood_adata"].obs["Nhood_size"] = np.array(
-        adata.obsm["cell_nhoods"].sum(0)).flatten()
+        adata.obsm[nhoods_key].sum(0)).flatten()
     # Add adjacency graph
-    adata.uns["nhood_adata"].obsp["nhood_connectivities"] = adata.obsm["cell_nhoods"].T.dot(
-        adata.obsm["cell_nhoods"])
+    adata.uns["nhood_adata"].obsp["nhood_connectivities"] = adata.obsm[nhoods_key].T.dot(
+        adata.obsm[nhoods_key])
     adata.uns["nhood_adata"].uns["nhood"] = {
         "connectivities_key": "nhood_connectivities", "distances_key": ""}
+
+
+def highly_variable_nhoods(adata: AnnData):
+    try:
+        nhood_adata = adata.uns['nhood_adata'].copy()
+    except:
+        raise ValueError(
+            "adata.uns['nhood_adata'] not found -- please run nhood_confidence first")
+
+    plt.hist2d(nhood_adata.obs['confidence_mean'], nhood_adata.obs['confidence_var'],
+               norm=matplotlib.colors.LogNorm(), bins=100)
+    plt.plot(nhood_adata.obsm['confidence_var_lowess'][:, 0],
+             nhood_adata.obsm['confidence_var_lowess'][:, 1], color='red')
+    plt.xlabel('nhood mean confidence')
+    plt.ylabel('nhood confidence var')
+    plt.title(f"{sum(nhood_adata.obs['highly_variable'])} HV nhoods")
