@@ -24,10 +24,12 @@ from anndata import AnnData
 
 from collections import Counter
 from sklearn.neighbors import KNeighborsTransformer
+from pynndescent import NNDescent
+import pynndescent
 
 
 ## --- KNN classifier uncertainty --- ##
-# As implemented in https://github.com/LungCellAtlas/mapping_data_to_the_HLCA/blob/main/scripts/scarches_label_transfer.py
+# Adapting implementation in https://github.com/LungCellAtlas/mapping_data_to_the_HLCA/blob/main/scripts/scarches_label_transfer.py
 
 
 def weighted_knn_trainer(
@@ -49,13 +51,6 @@ def weighted_knn_trainer(
         f"Weighted KNN with n_neighbors = {n_neighbors} ... ",
         end="",
     )
-    k_neighbors_transformer = KNeighborsTransformer(
-        n_neighbors=n_neighbors,
-        mode="distance",
-        algorithm="brute",
-        metric="euclidean",
-        n_jobs=-1,
-    )
     if train_adata_emb == "X":
         train_emb = train_adata.X
     elif train_adata_emb in train_adata.obsm.keys():
@@ -64,7 +59,13 @@ def weighted_knn_trainer(
         raise ValueError(
             "train_adata_emb should be set to either 'X' or the name of the obsm layer to be used!"
         )
-    k_neighbors_transformer.fit(train_emb)
+    k_neighbors_transformer = pynndescent.NNDescent(
+        train_emb,
+        n_neighbors=n_neighbors,
+        metric="euclidean",
+        n_jobs=-1,
+    )
+    k_neighbors_transformer.prepare()
     return k_neighbors_transformer
 
 
@@ -105,9 +106,9 @@ def weighted_knn_transfer(
         Has to be one of "paper" or "package". If mode is set to "package",
         uncertainties will be 1 - P(pred_label), otherwise it will be 1 - P(true_label).
     """
-    if not type(knn_model) == KNeighborsTransformer:
+    if not type(knn_model) == NNDescent:
         raise ValueError(
-            "knn_model should be of type sklearn.neighbors._graph.KNeighborsTransformer!"
+            "knn_model should be of type pynndescent.pynndescent_.NNDescent!"
         )
 
     if query_adata_emb == "X":
@@ -118,7 +119,8 @@ def weighted_knn_transfer(
         raise ValueError(
             "query_adata_emb should be set to either 'X' or the name of the obsm layer to be used!"
         )
-    top_k_distances, top_k_indices = knn_model.kneighbors(X=query_emb)
+    top_k_indices, top_k_distances = knn_model.query(
+        query_emb, k=knn_model.n_neighbors)
 
     stds = np.std(top_k_distances, axis=1)
     stds = (2.0 / stds) ** 2
@@ -137,6 +139,7 @@ def weighted_knn_transfer(
         for j in cols:
             y_train_labels = ref_adata_obs[j].values
             counter = Counter(y_train_labels[top_k_indices[i]])
+            # Here I assume the highest no of neighbors also has the highest probability
             best_label = max(counter, key=counter.get)
             best_prob = weights[i, y_train_labels[top_k_indices[i]]
                                 == best_label].sum()
