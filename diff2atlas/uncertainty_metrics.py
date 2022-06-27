@@ -204,11 +204,12 @@ def inference_posterior_distance(
         )
 
     # Compute distance 2 samples
-    dmat_all = torch.cdist(Z_dims, inference_outputs['z'], p=2).cpu().numpy()
-    dmat = np.diagonal(dmat_all, axis1=1, axis2=2)
+    dmat_all = torch.cdist(torch.Tensor(Z_dims).cuda(),
+                           inference_outputs['z'], p=2).cpu().numpy()
+    dmat = np.diagonal(dmat_all, axis1=0, axis2=2)
 
     # adata.obsm['dist_z_samples'] = dmat.T
-    return(dmat.mean(0))
+    return(dmat.mean(1))
 
 
 ## --- old code --- ##
