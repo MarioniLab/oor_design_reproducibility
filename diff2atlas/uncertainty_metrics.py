@@ -128,6 +128,10 @@ def trueVSpred_gex_cosine(
             raise FileNotFoundError(
                 f'{model} should be either a trained scvi.model.SCVI object or a path to a model dir')
 
+    # Check the model is correct
+    assert vae.adata.n_obs == query_adata.n_obs, 'The model was trained on a different set of cells'
+    assert vae.adata.obs_names == query_adata.obs_names, 'The model was trained on cells in a different order'
+
     if 'log1p' not in query_adata.uns.keys():
         sc.pp.normalize_per_cell(query_adata)
         sc.pp.log1p(query_adata)
@@ -151,10 +155,11 @@ def trueVSpred_gex_cosine(
     return(np.diag(cosine_all))
 
 
-def inference_posterior_distance(vae: scvi.model.SCVI,
-                                 adata: AnnData,
-                                 n_samples: int = 50,
-                                 seed: int = 42):
+def inference_posterior_distance(
+        model: Union[scvi.model.SCVI, str],
+        query_adata: AnnData,
+        n_samples: int = 50,
+        seed: int = 42):
     '''
     Compute distance of sampled z positions to inferred (mean) z position
     (~ uncertainty around the position in the latent space)
@@ -167,6 +172,18 @@ def inference_posterior_distance(vae: scvi.model.SCVI,
     --------
     -
     '''
+    if type(model) == scvi.model.SCVI:
+        vae = model
+    elif type(model) == str:
+        try:
+            vae = scvi.model.SCVI.load(model)
+        except:
+            raise FileNotFoundError(
+                f'{model} should be either a trained scvi.model.SCVI object or a path to a model dir')
+
+    # Check the model is correct
+    assert vae.adata.n_obs == query_adata.n_obs, 'The model was trained on a different set of cells'
+    assert vae.adata.obs_names == query_adata.obs_names, 'The model was trained on cells in a different order'
 
     scvi.settings.seed = seed
 
@@ -188,8 +205,8 @@ def inference_posterior_distance(vae: scvi.model.SCVI,
     dmat_all = torch.cdist(Z_dims, inference_outputs['z'], p=2).cpu().numpy()
     dmat = np.diagonal(dmat_all, axis1=1, axis2=2)
 
-    adata.obsm['dist_z_samples'] = dmat.T
-    adata.obs['mean_dist_z_samples'] = dmat.mean(0)
+    # adata.obsm['dist_z_samples'] = dmat.T
+    return(dmat.mean(0))
 
 
 ## --- old code --- ##
