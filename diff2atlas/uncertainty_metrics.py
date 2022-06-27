@@ -130,7 +130,8 @@ def trueVSpred_gex_cosine(
 
     # Check the model is correct
     assert vae.adata.n_obs == query_adata.n_obs, 'The model was trained on a different set of cells'
-    assert vae.adata.obs_names == query_adata.obs_names, 'The model was trained on cells in a different order'
+    assert all(vae.adata.obs_names ==
+               query_adata.obs_names), 'The model was trained on cells in a different order'
 
     if 'log1p' not in query_adata.uns.keys():
         sc.pp.normalize_per_cell(query_adata)
@@ -183,7 +184,8 @@ def inference_posterior_distance(
 
     # Check the model is correct
     assert vae.adata.n_obs == query_adata.n_obs, 'The model was trained on a different set of cells'
-    assert vae.adata.obs_names == query_adata.obs_names, 'The model was trained on cells in a different order'
+    assert all(vae.adata.obs_names ==
+               query_adata.obs_names), 'The model was trained on cells in a different order'
 
     scvi.settings.seed = seed
 
