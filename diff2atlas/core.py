@@ -3,6 +3,7 @@ from anndata import AnnData
 import anndata
 import pandas as pd
 import numpy as np
+import scanpy as sc
 
 from scipy.sparse import csr_matrix
 from scipy import stats
@@ -10,8 +11,13 @@ from statsmodels.stats.multitest import multipletests
 
 
 from sklearn.metrics import roc_curve, auc
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
 import statsmodels.api as sm
+
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score
+
+import multiprocessing
 
 
 # def _check_inputs(adata: AnnData) -> bool:
@@ -448,3 +454,95 @@ def _get_confidence_stats(nhood_adata, func, test_covariate, cov_level):
         s = nhood_adata[:, ixs].layers['confidence'].var(1)
     # nhood_adata.obs[f'mean_confidence_{test_covariate}{cov_level}'] = mean_conf
     return(s)
+
+
+def augur_nhoods(adata,
+                 test_covariate: str,
+                 ref_level: str = None,
+                 n_folds: int = 5,
+                 sample_size: int = 20,
+                 n_workers: int = 5
+                 ) -> None:
+    """Compute Augur
+
+    Params:
+    ------
+    - adata: AnnData object
+    - test_covariate: which covariate stores the condition of interest 
+    - ref_level: which level of test_covariate to set to 1
+    - n_folds: how many permutations to compute AUC on
+    - sample_size: how many cells from each condition to downsample to 
+        (crucial, otherwise AUC dependent on no of cells from each condition in nhood) 
+    - n_workers: for multiprocessing 
+    """
+    try:
+        nhood_adata = adata.uns['nhood_adata'].copy()
+    except:
+        raise ValueError(
+            "adata.uns['nhood_adata'] not found -- please run nhood_confidence first")
+
+    Y = (adata.obs[test_covariate]
+         == ref_level).astype('int').values
+
+    if 'log1p' not in adata.uns.keys():
+        adata.layers['counts'] = adata.X.copy()
+        sc.pp.normalize_per_cell(adata)
+        sc.pp.log1p(adata)
+
+    X = adata.X.copy()
+
+    # Make array w nhood x cell indexes (sample subsample of cells x nhood)
+    subsamples = []
+    for i in range(adata.obsm['nhoods'].shape[1]):
+        pos_ixs = np.where((_get_cells_from_nhood(
+            adata, i)) & (Y == 1))[0]
+        neg_ixs = np.where((_get_cells_from_nhood(
+            adata, i)) & (Y == 0))[0]
+
+        pos_ixs = np.random.choice(pos_ixs, sample_size)
+        neg_ixs = np.random.choice(neg_ixs, sample_size)
+        subsamples.append(np.hstack([pos_ixs, neg_ixs]))
+    nhoods_sample_ixs = np.vstack(subsamples)
+
+    pool = multiprocessing.Pool(n_workers)
+    inputs = [(Y[nhoods_sample_ixs[i, :]], X[nhoods_sample_ixs[i, :], :], 0.33)
+              for i in range(nhoods_sample_ixs.shape[0])]
+
+    # Do 5-fold CV dei poveri
+    aucs = np.array(pool.map(_nhood_augur, inputs))
+    for i in range(n_folds - 1):
+        print(f'it {i+1}')
+        aucs_i = np.array(pool.map(_nhood_augur, inputs))
+        aucs = np.vstack([aucs, aucs_i])
+    _get_nhood_adata(adata).obs['Augur_AUC'] = aucs.mean(0)
+
+
+def _nhood_augur(params):
+    Y_nhood, X_nhood, test_size = params
+
+    # Feature selection
+    hvgs = sc.pp.highly_variable_genes(anndata.AnnData(X_nhood), inplace=False)
+    X_nhood = X_nhood[:, hvgs['highly_variable']]
+
+    #  Split in train and test with subsampling
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X_nhood, Y_nhood, test_size=test_size)
+
+    # Train classifier on train
+    est = LogisticRegression(penalty='l2', random_state=None)
+    est.fit(X_train, Y_train)
+
+    ## Predict in test
+    Y_pred = est.predict(X_test)
+
+    #  Compute AUC
+    nhood_auc = roc_auc_score(Y_test, Y_pred)
+    return(nhood_auc)
+
+
+def _get_nhood_adata(adata):
+    return(adata.uns['nhood_adata'])
+
+
+def _get_cells_from_nhood(adata, i):
+    return((adata.obsm['nhoods'][:, i].toarray() == 1).flatten())
