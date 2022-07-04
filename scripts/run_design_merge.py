@@ -31,7 +31,7 @@ def compute_uncertainties(pac_design_adata, d, ref, sim_dir):
     )
     pac_design_adata.obs.loc[is_d, 'uncertainty_gex'] = unc_gex
 
-    unc_z = diff2atlas.uncertainty_metrics.trueVSpred_gex_cosine(
+    unc_z = diff2atlas.uncertainty_metrics.inference_posterior_distance(
         model=sim_dir + f"model_fit_{d}2{ref}/",
         query_adata=pac_design_adata[is_d],
         n_samples=50
