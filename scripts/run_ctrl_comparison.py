@@ -56,8 +56,8 @@ def _make_design(adata,
             0]
         adata.obs.loc[(adata.obs[batch_obs] == query_dataset),
                       'is_train'] = 0
-    assert all(adata.obs[adata.obs['is_train'] == 1]
-               [batch_obs].unique() != query_dataset)
+        assert all(adata.obs[adata.obs['is_train'] == 1]
+                [batch_obs].unique() != query_dataset)
 
 
 def _train_design(adata,
