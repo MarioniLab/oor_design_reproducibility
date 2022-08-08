@@ -9,24 +9,24 @@ import diff2atlas
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("h5ad_file",
+parser.add_argument("sim_dir",
                     type=str,
-                    help="path to input anndata file")
+                    help="path to simulation directory")
 parser.add_argument("ctrl_class",
                     type=str,
                     help="ID of ctrl class")
-parser.add_argument("perturb_pop",
-                    type=str,
-                    help="ID of perturbed population")
+# parser.add_argument("perturb_pop",
+#                     type=str,
+#                     help="ID of perturbed population")
 parser.add_argument("--population_obs",
                     default="cell_type",
                     help="column with population info used for simulation")
 parser.add_argument("--batch_obs",
                     default="dataset_id",
                     help="column with batch info used for simulation")
-parser.add_argument("--outpath",
-                    default='/nfs/team205/ed6/data/PBMC_CZI_integration_filtered/',
-                    help="path to working directory")
+# parser.add_argument("--outpath",
+#                     default='/nfs/team205/ed6/data/PBMC_CZI_integration_filtered/',
+#                     help="path to working directory")
 args = parser.parse_args()
 
 
@@ -57,33 +57,32 @@ def _make_design(adata,
         adata.obs.loc[(adata.obs[batch_obs] == query_dataset),
                       'is_train'] = 0
         assert all(adata.obs[adata.obs['is_train'] == 1]
-                [batch_obs].unique() != query_dataset)
+                   [batch_obs].unique() != query_dataset)
 
 
 def _train_design(adata,
                   ctrl_class,
-                  perturb_pop,
                   population_obs='cell_type',
                   data_dir='/nfs/team205/ed6/data/PBMC_CZI_integration_filtered/',
                   n_hvgs=5000
                   ):
 
-    # Remove query-specific pop from ctrl and atlas
-    adata.obs.loc[(adata.obs[population_obs].isin(perturb_pop)),
-                  'is_train'] = 0
-    adata.obs.loc[(adata.obs[population_obs].isin(
-        perturb_pop)), 'is_ctrl'] = 0
+    # # Remove query-specific pop from ctrl and atlas
+    # adata.obs.loc[(adata.obs[population_obs].isin(perturb_pop)),
+    #               'is_train'] = 0
+    # adata.obs.loc[(adata.obs[population_obs].isin(
+    #     perturb_pop)), 'is_ctrl'] = 0
 
     # test that no cell is assigned to multiple splits
     assert adata.obs[['is_train', 'is_test', 'is_ctrl']].sum(1).max() == 1
 
-    # test that perturbed population is in condition dataset only
-    assert adata[adata.obs['is_test'] ==
-                 1].obs[population_obs].isin(perturb_pop).sum() > 0
-    assert adata[adata.obs['is_train'] ==
-                 1].obs[population_obs].isin(perturb_pop).sum() == 0
-    assert adata[adata.obs['is_ctrl'] == 1].obs[population_obs].isin(
-        perturb_pop).sum() == 0
+    # # test that perturbed population is in condition dataset only
+    # assert adata[adata.obs['is_test'] ==
+    #              1].obs[population_obs].isin(perturb_pop).sum() > 0
+    # assert adata[adata.obs['is_train'] ==
+    #              1].obs[population_obs].isin(perturb_pop).sum() == 0
+    # assert adata[adata.obs['is_ctrl'] == 1].obs[population_obs].isin(
+    #     perturb_pop).sum() == 0
 
     adata_atlas = adata[adata.obs['is_train'] == 1].copy()
     adata_ctrl = adata[adata.obs['is_ctrl'] == 1].copy()
@@ -92,7 +91,7 @@ def _train_design(adata,
     #  Save anndata objects
 
     #  Make folder to store results
-    sim_id = f"ctrl_comparison_PBMC_500cells_demo_perturb_{population_obs}{clean_pop_name('-'.join(perturb_pop))}_ctrl_{ctrl_class}"
+    sim_id = f"ctrl_{ctrl_class}"
     if not os.path.exists(data_dir + sim_id):
         os.mkdir(data_dir + sim_id)
     adata_atlas.write_h5ad(data_dir+sim_id+'/atlas.h5ad')
@@ -162,9 +161,9 @@ def _train_design(adata,
     pac_design_adata.write_h5ad(sim_dir+'/pac_design.h5ad')
 
 
-adata = sc.read_h5ad(args.outpath + args.h5ad_file)
+adata = sc.read_h5ad(args.sim_dir + '/pa_design.h5ad')
 ctrl_comparison_design = pd.read_csv(
-    args.outpath + 'ctrl_comparison_design.csv', index_col=0)
+    args.sim_dir + '/ctrl_comparison_design.csv', index_col=0)
 
 _make_design(adata,
              ctrl_comparison_design,
@@ -174,7 +173,6 @@ _make_design(adata,
 _train_design(
     adata,
     ctrl_class=args.ctrl_class,
-    perturb_pop=[args.perturb_pop],
     population_obs=args.population_obs,
-    data_dir=args.outpath,
+    data_dir=args.sim_dir,
 )
