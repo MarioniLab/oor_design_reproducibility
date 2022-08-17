@@ -92,7 +92,7 @@ def plot_nhood_graph(
     - title: plot title (default: 'DA log-Fold Change')
     - **kwargs: other arguments to pass to scanpy.pl.embedding
     '''
-    _build_nhood_graph(adata, basis='X_umap', use_nhood_index=use_nhood_index)
+    _build_nhood_graph(adata, basis=basis, use_nhood_index=use_nhood_index)
     nhood_adata = adata.uns["nhood_adata"].copy()
 
     sc.pl.embedding(nhood_adata, "X_nhood_graph",
