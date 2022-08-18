@@ -20,3 +20,8 @@ for d in $(ls -d $outdir*/); do
         bsub -G teichlab -o logfile-milo-%J.out -e logfile-milo-%J.err -q gpu-normal -M30000 -R "select[mem>30000] rusage[mem=30000]" -gpu "mode=shared:j_exclusive=no:gmem=6000:num=1" 
 done
 
+for d in $(ls -d $outdir*/); do
+    echo "python run_milo.py ${d} --prop target" | \
+        bsub -G teichlab -o logfile-milo-%J.out -e logfile-milo-%J.err -q gpu-normal -M30000 -R "select[mem>30000] rusage[mem=30000]" -gpu "mode=shared:j_exclusive=no:gmem=6000:num=1" 
+done
+
