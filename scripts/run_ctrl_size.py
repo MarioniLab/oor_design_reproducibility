@@ -14,6 +14,9 @@ parser.add_argument("sim_dir",
 parser.add_argument("n_controls",
                     type=int,
                     help="number of control donors to use")
+parser.add_argument("n_querys",
+                    type=int,
+                    help="number of query donors to use")
 parser.add_argument("random_seed",
                     type=int,
                     help="seed for sampling of controls")
@@ -40,13 +43,13 @@ def filter_genes_scvi(adata_PC_train):
     )
 
 
-def main(sim_dir, n_controls, random_seed):
+def main(sim_dir, n_controls, n_querys, random_seed):
     # Load query and control
     adata_query = sc.read_h5ad(sim_dir + '/query.h5ad')
     adata_ctrl = sc.read_h5ad(sim_dir + '/ctrl.h5ad')
 
     # Make new dir for outputs
-    outdir = os.path.join(sim_dir, 'ctrl_size_analysis/')
+    outdir = os.path.join(sim_dir, f'ctrl_size_analysis_nquery{n_querys}/')
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
@@ -55,10 +58,16 @@ def main(sim_dir, n_controls, random_seed):
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
+    # Subset query donors (to always have less query than ctrl donors)
+    np.random.seed(random_seed)
+    query_donors = adata_query.obs['donor_id'].unique()
+    sample_querys = np.random.choice(query_donors, n_querys, replace=False)
+    adata_query = adata_query[adata_query.obs['donor_id'].isin(sample_querys)]
+
     # Subset control donors
     np.random.seed(random_seed)
     ctrl_donors = adata_ctrl.obs['donor_id'].unique()
-    sample_ctrls = np.random.choice(ctrl_donors, n_controls)
+    sample_ctrls = np.random.choice(ctrl_donors, n_controls, replace=False)
     adata_ctrl = adata_ctrl[adata_ctrl.obs['donor_id'].isin(sample_ctrls)]
 
     adata_merge = anndata.concat([adata_query, adata_ctrl])
@@ -103,12 +112,17 @@ def main(sim_dir, n_controls, random_seed):
 
     # map ctrl to atlas and load query model
     adata_ctrl_fit = adata_ctrl.copy()
+    adata_query_fit = adata_query.copy()
     vae_fit_ctrl2atlas = diff2atlas.model_wrappers.fit_scVI(
         sim_dir + '/model_reference',
         adata_ctrl_fit,
         outfile=outdir + "/model_fit_ctrl2atlas/")
-    vae_fit_query2atlas = scvi.model.SCVI.load(
-        sim_dir + "/model_fit_query2atlas/")
+    vae_fit_query2atlas = diff2atlas.model_wrappers.fit_scVI(
+        sim_dir + '/model_reference',
+        adata_query_fit,
+        outfile=outdir + "/model_fit_query2atlas/")
+    # vae_fit_query2atlas = scvi.model.SCVI.load(
+    #     sim_dir + "/model_fit_query2atlas/")
 
     adata_PAC.obsm['X_scVI'] = np.vstack([
         vae_fit_query2atlas.get_latent_representation(),
@@ -133,4 +147,4 @@ def main(sim_dir, n_controls, random_seed):
 # sim_dir = resdir  + [x for x in os.listdir(resdir) if x.startswith('qPBMC')][2]
 # n_controls = 3
 # random_seed = 12345 ## seed for sampling of control cells
-main(args.sim_dir, args.n_controls, args.random_seed)
+main(args.sim_dir, args.n_controls, args.n_querys, args.random_seed)
