@@ -2,7 +2,7 @@ import os
 import numpy as np
 import scanpy as sc
 import anndata
-import scvi
+import milopy
 
 import diff2atlas
 
@@ -43,6 +43,19 @@ def filter_genes_scvi(adata_PC_train):
     )
 
 
+def run_milo(adata_design, query_group, reference_group,
+             sample_col='sample_id',
+             annotation_col='cell_type',
+             design='~ is_query'
+             ):
+    milopy.core.make_nhoods(adata_design, prop=0.1)
+    milopy.core.count_nhoods(adata_design, sample_col=sample_col)
+    milopy.utils.annotate_nhoods(
+        adata_design[adata_design.obs['dataset_group'] == reference_group], annotation_col)
+    adata_design.obs['is_query'] = adata_design.obs['dataset_group'] == query_group
+    milopy.core.DA_nhoods(adata_design, design=design)
+
+
 def main(sim_dir, n_controls, n_querys, random_seed):
     # Load query and control
     adata_query = sc.read_h5ad(sim_dir + '/query.h5ad')
@@ -58,10 +71,14 @@ def main(sim_dir, n_controls, n_querys, random_seed):
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
-    # Subset query donors (to always have less query than ctrl donors)
-    np.random.seed(random_seed)
-    query_donors = adata_query.obs['donor_id'].unique()
-    sample_querys = np.random.choice(query_donors, n_querys, replace=False)
+    # Subset query donors with most cells in query_specific population (to always have less query than ctrl donors)
+    # np.random.seed(random_seed)
+    # query_donors = adata_query.obs['donor_id'].unique()
+    # sample_querys = np.random.choice(query_donors, n_querys, replace=False)
+    perturb_pop = sim_dir.split(
+        '/')[-1].split('perturb_cell_type')[-1].split('_queryBatch')[0]
+    sample_querys = adata_query.obs[adata_query.obs['cell_type'] == perturb_pop].value_counts(
+        'donor_id')[0:n_querys].index.values
     adata_query = adata_query[adata_query.obs['donor_id'].isin(sample_querys)]
 
     # Subset control donors
@@ -134,13 +151,29 @@ def main(sim_dir, n_controls, n_querys, random_seed):
     assert (adata_PC.obs_names == adata_merge.obs_names).all()
     assert (adata_PAC.obs_names == adata_merge.obs_names).all()
 
-    sc.pp.neighbors(adata_jointPC, use_rep='X_scVI', n_neighbors=100)
-    sc.pp.neighbors(adata_PC, use_rep='X_scVI', n_neighbors=100)
-    sc.pp.neighbors(adata_PAC, use_rep='X_scVI', n_neighbors=100)
+    sc.pp.neighbors(adata_jointPC, use_rep='X_scVI',
+                    n_neighbors=(n_controls+n_querys)*5)
+    sc.pp.neighbors(adata_PC, use_rep='X_scVI',
+                    n_neighbors=(n_controls+n_querys)*5)
+    sc.pp.neighbors(adata_PAC, use_rep='X_scVI',
+                    n_neighbors=(n_controls+n_querys)*5)
 
-    adata_jointPC.write_h5ad(outdir + "jointPC_design.h5ad")
-    adata_PC.write_h5ad(outdir + "PC_design.h5ad")
-    adata_PAC.write_h5ad(outdir + "PAC_design.h5ad")
+    # Run milo analysis
+    adata_PAC.obs['dataset_group'] = np.where(
+        adata_PAC.obs['is_test'] == 1, 'query', 'ctrl')
+    adata_PC.obs['dataset_group'] = np.where(
+        adata_PC.obs['is_test'] == 1, 'query', 'ctrl')
+    adata_jointPC.obs['dataset_group'] = np.where(
+        adata_jointPC.obs['is_test'] == 1, 'query', 'ctrl')
+
+    run_milo(adata_PAC, query_group='query', reference_group='ctrl')
+    run_milo(adata_jointPC, query_group='query', reference_group='ctrl')
+    run_milo(adata_PC, query_group='query', reference_group='ctrl')
+
+    milopy.utils.write_milo_adata(adata_PAC, outdir + '/PAC_design.h5ad')
+    milopy.utils.write_milo_adata(adata_PC, outdir + '/PC_design.h5ad')
+    milopy.utils.write_milo_adata(
+        adata_jointPC, outdir + '/jointPC_design.h5ad')
 
 
 # resdir = '/lustre/scratch117/cellgen/team205/ed6/PBMC_CZI_integration_filtered/'
