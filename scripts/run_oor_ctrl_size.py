@@ -70,15 +70,6 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
     adata_merge = adata_merge[adata_merge.obs.donor_id.isin(
         keep_samples)].copy()
 
-    # # Prep for OOR_benchmark methods
-    # adata_merge.obs['dataset_group'] = np.where(
-    #     adata_merge.obs['is_ctrl'] == 1, 'ctrl', 'query')
-    # if 'OOR_state' not in adata_merge.obs:
-    #     adata_merge.obs['OOR_state'] = np.where(
-    #         adata_merge.obs[annotation_col] == oor_ct, 1, 0)
-    # if 'cell_annotation' not in adata_merge.obs:
-    #     adata_merge.obs['cell_annotation'] = adata_merge.obs[annotation_col].copy()
-    # assert not _check_nonegative_integers_X(adata_merge)
     assert check_dataset(adata_merge)
 
     # ## --- CR design joint --- ##
@@ -125,7 +116,7 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
     sample_adata = acr_adata.uns["nhood_adata"].T.copy()
     sample_adata.var["OOR_score"] = sample_adata.var["logFC"].copy()
     sample_adata.var["OOR_signif"] = (
-        ((sample_adata.var["SpatialFDR"] < signif_alpha) &
+        ((sample_adata.var["SpatialFDR"] < 0.1) &
          (sample_adata.var["logFC"] > 0)).astype(int).copy()
     )
     sample_adata.varm["groups"] = acr_adata.obsm["nhoods"].T
