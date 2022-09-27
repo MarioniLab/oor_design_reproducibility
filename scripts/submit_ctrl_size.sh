@@ -7,7 +7,7 @@ outdir=/lustre/scratch117/cellgen/team205/ed6/PBMC_CZI_integration_filtered/
 
 ## Selecting cell types with high TPR
 
-for ct in natural_killer_cell classical_monocyte central_memory_CD4_positive_alpha_beta_T_cell naive_B_cell effector_memory_CD8_positive_alpha_beta_T_cell; do
+for ct in natural_killer_cell classical_monocyte central_memory_CD4_positive_alpha_beta_T_cell effector_memory_CD8_positive_alpha_beta_T_cell; do
     # for d in $(ls -d $outdir/qPBMC*/); do
     d=${outdir}/qPBMC_500cells_demo_perturb_cell_type${ct}_queryBatchdataset_id10_1038_s41591_021_01329_2_seed2022
     # for nq in $(seq 3 15); do
