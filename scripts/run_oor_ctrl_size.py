@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import scanpy as sc
-from oor_benchmark.api import _check_nonegative_integers_X, check_datasets
+from oor_benchmark.api import _check_nonegative_integers_X, check_dataset
 from oor_benchmark.methods import scArches_milo
 from oor_benchmark.metrics.utils import make_OOR_per_group
 from oor_benchmark.metrics.FDR_TPR_FPR import FDR_TPR_FPR
@@ -79,7 +79,7 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
     # if 'cell_annotation' not in adata_merge.obs:
     #     adata_merge.obs['cell_annotation'] = adata_merge.obs[annotation_col].copy()
     # assert not _check_nonegative_integers_X(adata_merge)
-    assert check_datasets(adata_merge)
+    assert check_dataset(adata_merge)
 
     # ## --- CR design joint --- ##
     # adata_jointPC = adata_merge.copy()
