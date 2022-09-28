@@ -25,7 +25,7 @@ parser.add_argument("perturb_pop",
                     help="ID of perturbed population")
 parser.add_argument("design",
                     type=str,
-                    help="ID of reference design")                    
+                    help="ID of reference design")
 parser.add_argument("--annotation_col",
                     default="cell_type",
                     help="column with population info used for simulation")
@@ -101,6 +101,7 @@ if ref_design == 'ACR':
         harmonize_output=False
     )
     write_milo_adata(acr_adata, outdir + sim_id + '/acr_design.h5ad')
+
 elif ref_design == 'AR':
     ar_adata = scArches_milo.scArches_atlas_milo_atlas(
         adata,

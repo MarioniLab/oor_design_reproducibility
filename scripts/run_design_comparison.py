@@ -2,7 +2,7 @@ import os
 import numpy as np
 import scanpy as sc
 
-import diff2atlas
+import oor_benchmark
 
 import argparse
 parser = argparse.ArgumentParser()
