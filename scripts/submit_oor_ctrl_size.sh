@@ -10,7 +10,7 @@ dirs=$(dirname $outdir/*/acr_design.h5ad)
 ## Selecting cell types with high TPR
 for d in $dirs; do
     for nc in $(seq 3 12); do
-        for s in $(seq 12348 12349); do 
+        for s in $(seq 12345 12349); do 
             echo "python run_oor_ctrl_size.py ${d}/ ${nc} 7 ${s}" | \
                 bsub -G teichlab -o logfile-ctrlsize-%J.out -e logfile-ctrlsize-%J.err -q gpu-normal -M50000 -R "select[mem>50000] rusage[mem=50000]" -gpu "mode=shared:j_exclusive=no:gmem=6000:num=1" 
         done

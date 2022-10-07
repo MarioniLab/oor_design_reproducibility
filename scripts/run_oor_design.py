@@ -3,7 +3,6 @@ from multiprocessing.sharedctypes import Value
 import os
 import numpy as np
 import scanpy as sc
-import gc
 
 
 from oor_benchmark.api import check_dataset
@@ -44,11 +43,6 @@ parser.add_argument("--outpath",
 parser.add_argument("--testing", action='store_true',
                     help="Run in testing mode")
 args = parser.parse_args()
-
-
-def clean_pop_name(string):
-    return(''.join(e if e.isalnum() else '_' for e in string))
-
 
 h5ad_file = args.h5ad_file
 perturb_pop = [args.perturb_pop]
@@ -93,12 +87,15 @@ if not os.path.exists(outdir + sim_id):
 if 'X_scVI' in adata.obsm:
     del adata.obsm['X_scVI']
 
+adata.obs['Site'] = adata.obs['donor_id'].str[0:3] ## Only for Stephenson data
+
 if ref_design == 'ACR':
     acr_adata = scArches_milo.scArches_atlas_milo_ctrl(
         adata,
         train_params={'max_epochs': m_epochs},
         outdir=outdir + sim_id,
-        harmonize_output=False
+        harmonize_output=False,
+        milo_design = "~Site+is_query"
     )
     write_milo_adata(acr_adata, outdir + sim_id + '/acr_design.h5ad')
 
@@ -115,7 +112,8 @@ elif ref_design == 'CR':
         adata,
         train_params={'max_epochs': m_epochs},
         outdir=outdir + sim_id,
-        harmonize_output=False
+        harmonize_output=False,
+        milo_design = "~Site+is_query"
     )
     write_milo_adata(cr_adata, outdir + sim_id + '/cr_design.h5ad')
 else:

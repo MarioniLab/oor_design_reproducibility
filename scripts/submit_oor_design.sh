@@ -12,8 +12,11 @@ for p in $(cat /lustre/scratch117/cellgen/team205/ed6/PBMC_CZI_integration_filte
     done
 done
 
-## Test AR design requirements
-p=central_memory_CD4_positive_alpha_beta_T_cell
-d=AR
-echo "python run_oor_design.py PBMC_merged.normal.subsample500cells.clean_celltypes.h5ad ${p} ${d} --outpath ${outdir}" | \
-            bsub -G teichlab -o logfile-scvi-%J.out -e logfile-scvi-%J.err -q gpu-normal -M200000 -R "select[mem>200000] rusage[mem=200000]" -gpu "mode=shared:j_exclusive=no:gmem=6000:num=1" 
+simdirs=$(ls -d $outdir/qPBMC_500cells_demo_perturb_cell_type*)
+for s in $simdirs; do
+    # echo "
+    python parse_oor_design.py ${s}
+    # " | \
+    #         bsub -G teichlab -o logfile-scvi-%J.out -e logfile-scvi-%J.err -q normal -M25000 -R "select[mem>25000] rusage[mem=25000]" 
+done
+

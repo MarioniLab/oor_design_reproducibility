@@ -8,68 +8,68 @@ import matplotlib
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from . import core
+# from . import core
 
 
-def plot_nhood_confidence_boxplot(adata: AnnData,
-                                  obs_names: List[str],
-                                  n_cols: int = None,
-                                  ylim: List[float] = None) -> None:
-    '''
-    Plot boxplot to show results of differential confidence analysis.
+# def plot_nhood_confidence_boxplot(adata: AnnData,
+#                                   obs_names: List[str],
+#                                   n_cols: int = None,
+#                                   ylim: List[float] = None) -> None:
+#     '''
+#     Plot boxplot to show results of differential confidence analysis.
 
-    Params:
-    -------
-    - adata: AnnData object (after running test_confidence)
-    - obs_names: list of nhood names to plot
-    '''
-    try:
-        nhood_adata = adata.uns['nhood_adata'].copy()
-    except:
-        raise ValueError(
-            "adata.uns['nhood_adata'] not found -- please run nhood_confidence first")
+#     Params:
+#     -------
+#     - adata: AnnData object (after running test_confidence)
+#     - obs_names: list of nhood names to plot
+#     '''
+#     try:
+#         nhood_adata = adata.uns['nhood_adata'].copy()
+#     except:
+#         raise ValueError(
+#             "adata.uns['nhood_adata'] not found -- please run nhood_confidence first")
 
-    # Get covariates used for testing
-    test_covariate = nhood_adata.uns['test_confidence']['test_covariate']
-    ref_level = nhood_adata.uns['test_confidence']['ref_level']
-    X_cond = core._get_test_column(
-        adata, test_covariate, ref_level)
+#     # Get covariates used for testing
+#     test_covariate = nhood_adata.uns['test_confidence']['test_covariate']
+#     ref_level = nhood_adata.uns['test_confidence']['ref_level']
+#     X_cond = core._get_test_column(
+#         adata, test_covariate, ref_level)
 
-    if n_cols is None:
-        n_cols = len(obs_names)
-    n_rows = round(len(obs_names)/n_cols)
+#     if n_cols is None:
+#         n_cols = len(obs_names)
+#     n_rows = round(len(obs_names)/n_cols)
 
-    for i, o in enumerate(obs_names):
-        plt.subplot(n_rows, n_cols, i+1)
-        #  Get confidence statistic
-        Y_conf = nhood_adata[o].layers['confidence'].flatten()
+#     for i, o in enumerate(obs_names):
+#         plt.subplot(n_rows, n_cols, i+1)
+#         #  Get confidence statistic
+#         Y_conf = nhood_adata[o].layers['confidence'].flatten()
 
-        # Get test statistic
-        test_stat = nhood_adata[o].obs['confidence_test_statistic'][0]
-        stat_type = nhood_adata.uns['test_confidence']['method']
+#         # Get test statistic
+#         test_stat = nhood_adata[o].obs['confidence_test_statistic'][0]
+#         stat_type = nhood_adata.uns['test_confidence']['method']
 
-        pl_df = pd.DataFrame([X_cond, Y_conf]).T
-        pl_df.columns = ['condition', 'confidence']
-        test_covariate_levels = nhood_adata.var[test_covariate].cat.categories
-        if len(test_covariate_levels) == 2:
-            ctrl_level = test_covariate_levels[test_covariate_levels != ref_level].tolist()[
-                0]
-        else:
-            ctrl_level = 'other'
-        pl_df['condition'] = [ref_level if x ==
-                              1 else ctrl_level for x in pl_df.condition]
-        pl_df['condition'] = pl_df.condition.astype(
-            "category").cat.reorder_categories([ctrl_level, ref_level])
+#         pl_df = pd.DataFrame([X_cond, Y_conf]).T
+#         pl_df.columns = ['condition', 'confidence']
+#         test_covariate_levels = nhood_adata.var[test_covariate].cat.categories
+#         if len(test_covariate_levels) == 2:
+#             ctrl_level = test_covariate_levels[test_covariate_levels != ref_level].tolist()[
+#                 0]
+#         else:
+#             ctrl_level = 'other'
+#         pl_df['condition'] = [ref_level if x ==
+#                               1 else ctrl_level for x in pl_df.condition]
+#         pl_df['condition'] = pl_df.condition.astype(
+#             "category").cat.reorder_categories([ctrl_level, ref_level])
 
-        # Plot
-        sns.boxplot(data=pl_df, x='condition', y='confidence')
-        sns.stripplot(data=pl_df, x='condition', y='confidence', color='black')
-        plt.title(f'{o}\n{stat_type} = {np.round(test_stat, 3)}')
-        plt.xlabel('')
-        if ylim is not None:
-            plt.ylim(ylim[0], ylim[1])
+#         # Plot
+#         sns.boxplot(data=pl_df, x='condition', y='confidence')
+#         sns.stripplot(data=pl_df, x='condition', y='confidence', color='black')
+#         plt.title(f'{o}\n{stat_type} = {np.round(test_stat, 3)}')
+#         plt.xlabel('')
+#         if ylim is not None:
+#             plt.ylim(ylim[0], ylim[1])
 
-    plt.tight_layout()
+#     plt.tight_layout()
 
 
 def plot_nhood_graph(

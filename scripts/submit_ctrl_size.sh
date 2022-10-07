@@ -19,6 +19,15 @@ for ct in natural_killer_cell classical_monocyte central_memory_CD4_positive_alp
     done
 done
 
+## Atlas subsampling comparison
+for ct in natural_killer_cell classical_monocyte central_memory_CD4_positive_alpha_beta_T_cell effector_memory_CD8_positive_alpha_beta_T_cell; do
+    d=${outdir}/qPBMC_500cells_demo_perturb_cell_type${ct}_queryBatchdataset_id10_1038_s41591_021_01329_2_seed2022
+    for method in random closest; do
+            echo "python run_ctrl_subsampling.py $d $method --random_seed 41"  | \
+            bsub -G teichlab -o logfile-subsampling-%J.out -e logfile-subsampling-%J.err -q gpu-normal -M50000 -R "select[mem>50000] rusage[mem=50000]" -gpu "mode=shared:j_exclusive=no:gmem=6000:num=1" 
+    done
+done
+
 # for d in $(ls -d $outdir*/); do
 #     echo "python run_milo.py ${d} --prop target" | \
 #         bsub -G teichlab -o logfile-milo-%J.out -e logfile-milo-%J.err -q gpu-normal -M30000 -R "select[mem>30000] rusage[mem=30000]" -gpu "mode=shared:j_exclusive=no:gmem=6000:num=1" 

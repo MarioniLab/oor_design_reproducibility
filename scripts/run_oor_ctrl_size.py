@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import scanpy as sc
-from oor_benchmark.api import _check_nonegative_integers_X, check_dataset
+from oor_benchmark.api import check_dataset
 from oor_benchmark.methods import scArches_milo
 from oor_benchmark.metrics.utils import make_OOR_per_group
 from oor_benchmark.metrics.FDR_TPR_FPR import FDR_TPR_FPR
