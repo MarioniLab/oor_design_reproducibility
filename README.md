@@ -2,12 +2,17 @@
 
 This repository contains notebooks and scripts to reproduce analyses benchmarking the use of control and atlas datasets as references for identification of disease-associated cell states (see [manuscript]()).
 
-The workflow for disease-state identification and evaluation of out-of-reference detection is available as a [python package](https://github.com/emdann/oor_benchmark).
+The workflow for disease-state identification and evaluation of out-of-reference detection is available as a [python package](https://github.com/emdann/oor_benchmark). 
 
 ## Repository structure
 
-- `metadata` - ciao
-- `src` - contains notebooks and scripts 
+- `diff2atlas` - utility module 
+- `metadata` - study and sample level metadata
+- `src` - analysis notebooks and scripts 
+  - `1_PBMC_data_preprocessing/` - preprocessing and harmonization of PBMC dataset
+  - `2_simulation_design/` - out-of-reference detection benchmark on simulations
+  - `3_simulation_ctrl_atlas_size` - out-of-reference detection robustness to atlas and control dataset size
+  - `4_COVID_design` - reference design comparison on COVID-19 dataset 
 
 ## Data
 
@@ -33,6 +38,6 @@ For COVID-19 analysis
 
 ## Contact
 
-For any questions, please post an [issue](https://github.com/emdann/diff2atlas/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) in this repository or contact by email `ed6<at>sanger.ac.uk`
+For any questions, please post an [issue](https://github.com/emdann/diff2atlas/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 
 
