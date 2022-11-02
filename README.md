@@ -11,14 +11,21 @@ The workflow for disease-state identification and evaluation of out-of-reference
 
 ## Data
 
-Pre-processed datasets used in this analysis are available via [figshare](). For references of the original datasets collected see [study metadata](). 
+Processed datasets and scVI models used in this analysis are available via [figshare](). For references of the original datasets collected see [study metadata](). 
 
-- `PBMC_merged.normal.subsample500cells.clean_celltypes.h5ad` - harmonized object of healthy PBMC profiles from 12 studies, used for OOR identification benchmark with simulations
-- For COVID-19 analysis
-  - ``
+For simulation analysis
+- `PBMC_merged.normal.subsample500cells.clean_celltypes.h5ad` - harmonized object of healthy PBMC profiles from 13 studies, used for OOR identification benchmark with simulations
+- `model_PBMC_merged.normal.subsample500cells.zip` - scVI model trained on healthy PBMC profiles (used for joint annotation) 
 
- 
-
+For COVID-19 analysis
+- `PBMC_COVID.subsample500cells.atlas.h5ad` - atlas dataset (PBMCs from healthy individuals from 12 studies)
+- `PBMC_COVID.subsample500cells.covid.h5ad`- disease dataset (PBMCs from COVID-19 patients from [Stephenson et al. 2021](https://www.nature.com/articles/s41591-021-01329-2))
+- `PBMC_COVID.subsample500cells.ctrl.h5ad` - control dataset (PBMCs from healthy individuals from [Stephenson et al. 2021](https://www.nature.com/articles/s41591-021-01329-2))
+- `PBMC_COVID.subsample500cells.design.query_PC_refA.post_milo.h5ad` - ACR design processed object with Milo results (load with [`milopy.utils.read_milo_adata`](https://milopy.readthedocs.io/en/latest/autoapi/milopy/utils/index.html#milopy.utils.read_milo_adata)).
+- `PBMC_COVID.subsample500cells.design.query_PC_refA.post_milo.nhood_adata.h5ad` - ACR design processed object with Milo results (nhood AnnData)
+- `PBMC_COVID.subsample500cells.design.query_P_refC.post_milo.h5ad` - CR design processed object with Milo results (load with [`milopy.utils.read_milo_adata`](https://milopy.readthedocs.io/en/latest/autoapi/milopy/utils/index.html#milopy.utils.read_milo_adata)).
+- `PBMC_COVID.subsample500cells.design.query_P_refC.post_milo.nhood_adata.h5ad` - CR design processed object with Milo results (nhood AnnData)
+- `model_COVID19_reference_atlas_scvi0.16.2` - scVI model trained on atlas dataset (used for ACR design)
 
 ## Citation
 
