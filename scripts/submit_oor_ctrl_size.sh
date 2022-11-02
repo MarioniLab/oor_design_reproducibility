@@ -7,7 +7,6 @@ outdir=/lustre/scratch117/cellgen/team205/ed6/PBMC_CZI_integration_filtered/tmp/
 dirs=$(dirname $outdir/*/acr_design.h5ad)
 # dirs=$(cat missing_cts_ctrl_size.txt)
 
-## Selecting cell types with high TPR
 for d in $dirs; do
     for nc in $(seq 3 12); do
         for s in $(seq 12345 12349); do 

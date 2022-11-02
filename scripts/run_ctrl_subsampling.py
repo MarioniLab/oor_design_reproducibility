@@ -1,3 +1,4 @@
+import os
 import argparse
 from multiprocessing.sharedctypes import Value
 import numpy as np
@@ -119,19 +120,21 @@ adata.obs['dataset_group'] = np.where(adata.obs['sample_id'].isin(query_samples)
 assert adata.obs['dataset_group'].value_counts().shape[0] == 3
 assert check_dataset(adata)
 
-outdir = sim_dir + 'ctrl_by_subsampling_{subsampling_method}{random_seed}/'
+outdir = sim_dir + f'/ctrl_by_subsampling_{subsampling_method}{random_seed}/'
+if not os.path.exists(outdir):
+    os.mkdir(outdir)
 
 # Run embedding and differential abundance testing
 if 'X_scVI' in adata.obsm:
     del adata.obsm['X_scVI']
 
-adata.obs['Site'] = adata.obs['donor_id'].str[0:3]  # Only for Stephenson data
+# adata.obs['Site'] = adata.obs['donor_id'].str[0:3]  # Only for Stephenson data
 
 acr_adata = scArches_milo.scArches_atlas_milo_ctrl(
     adata,
     train_params={'max_epochs': 300},
     outdir=outdir,
     harmonize_output=False,
-    milo_design="~Site+is_query"
+    milo_design="~is_query"
 )
 write_milo_adata(acr_adata, outdir + 'acr_design.h5ad')

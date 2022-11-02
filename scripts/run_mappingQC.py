@@ -25,8 +25,8 @@ if h5ad_file.split('/')[-1].startswith('cr'):
     embedding_reference = 'ctrl'
 if h5ad_file.split('/')[-1].startswith('ar'):
     embedding_reference = 'atlas'
-if h5ad_file.split('/')[-1].startswith('acr'):
-    embedding_reference = 'atlas'
+# if h5ad_file.split('/')[-1].startswith('acr'):
+#     embedding_reference = 'atlas'
 
 adata.obs.loc[adata.obs['dataset_group'] !=
               embedding_reference, 'dataset_group'] = 'query'
