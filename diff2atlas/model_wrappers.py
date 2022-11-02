@@ -4,7 +4,7 @@ from anndata import AnnData
 import scanpy as sc
 import torch
 import scvi
-import celltypist
+# import celltypist
 
 from pynndescent import NNDescent
 import pynndescent
@@ -68,37 +68,37 @@ def fit_scVI(
     return(vae_q)
 
 
-## --- CellTypist --- ##
+# ## --- CellTypist --- ##
 
-def train_celltypist(
-        train_adata: AnnData,
-        labels_obs: str,
-        outfile: str = None,
-        **kwargs):
-    '''
-    Train celltypist model
-    Params:
-    ------
-    - train_adata: AnnData object of training data (already subset to highly variable genes)
-        counts should be stored in train_adata.layers['counts']
-    - labels_obs: column in obs storing cell type labels for classification
-    - outfile: path to pkl file to save trained model
-    - **kwargs: arguments for celltypist.train
-    '''
+# def train_celltypist(
+#         train_adata: AnnData,
+#         labels_obs: str,
+#         outfile: str = None,
+#         **kwargs):
+#     '''
+#     Train celltypist model
+#     Params:
+#     ------
+#     - train_adata: AnnData object of training data (already subset to highly variable genes)
+#         counts should be stored in train_adata.layers['counts']
+#     - labels_obs: column in obs storing cell type labels for classification
+#     - outfile: path to pkl file to save trained model
+#     - **kwargs: arguments for celltypist.train
+#     '''
 
-    # Preprocessing
-    train_adata.X = train_adata.layers['counts'].copy()
-    sc.pp.normalize_total(train_adata, target_sum=10000)
-    sc.pp.log1p(train_adata)
+#     # Preprocessing
+#     train_adata.X = train_adata.layers['counts'].copy()
+#     sc.pp.normalize_total(train_adata, target_sum=10000)
+#     sc.pp.log1p(train_adata)
 
-    # Train
-    ct_model = celltypist.train(
-        train_adata, labels=labels_obs, n_jobs=10, feature_selection=True, **kwargs)
+#     # Train
+#     ct_model = celltypist.train(
+#         train_adata, labels=labels_obs, n_jobs=10, feature_selection=True, **kwargs)
 
-    # Save
-    if outfile is not None:
-        ct_model.write(outfile)
-    return(ct_model)
+#     # Save
+#     if outfile is not None:
+#         ct_model.write(outfile)
+#     return(ct_model)
 
 ## --- KNN classifier --- ##
 
