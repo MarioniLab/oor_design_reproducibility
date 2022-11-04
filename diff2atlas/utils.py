@@ -57,13 +57,6 @@ def anndata2pseudobulk(adata, group_by,
     sample_dummies = scipy.sparse.csr_matrix(sample_dummies)
     pseudobulk_X = X.T.dot(sample_dummies)
     
-#     ## Check that pseudobulk profiles are the sum of all profiles in a sample
-#     a = np.array(X[sample_dummies[:,0]!=0, :].sum(0)).flatten()
-#     b = pseudobulk_X[:,0].toarray().flatten()
-#     assert np.all(a == b), "Aggregation doesn't coincide with sum across the same sample"
-#     if agg=="m":
-#         pseudobulk_X = csr_matrix(pseudobulk_X / sample_dummies.toarray().sum(0))
-    
     ## Make new anndata object
     pseudobulk_adata = anndata.AnnData(pseudobulk_X.T, obs=pseudobulk_obs, var=adata.var)
     

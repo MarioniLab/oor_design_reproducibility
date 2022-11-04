@@ -16,7 +16,7 @@ The workflow for disease-state identification and evaluation of out-of-reference
 
 ## Data
 
-Processed datasets and scVI models used in this analysis are available via [figshare](). For references of the original datasets collected see [study metadata](). 
+Processed datasets and scVI models used in this analysis are available via [figshare](https://doi.org/10.6084/m9.figshare.21456645.v1). For references of the original datasets collected see [study metadata](https://github.com/MarioniLab/oor_design_reproducibility/blob/master/metadata/PBMC_study_metadata.csv). 
 
 For simulation analysis
 - `PBMC_merged.normal.subsample500cells.clean_celltypes.h5ad` - harmonized object of healthy PBMC profiles from 13 studies, used for OOR identification benchmark with simulations
@@ -38,6 +38,6 @@ For COVID-19 analysis
 
 ## Contact
 
-For any questions, please post an [issue](https://github.com/emdann/diff2atlas/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
+For any questions, please post an [issue](https://github.com/MarioniLab/oor_design_reproducibility/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 
 
