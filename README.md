@@ -1,6 +1,6 @@
 # Disease-state identification with healthy single-cell references  
 
-This repository contains notebooks and scripts to reproduce analyses benchmarking the use of control and atlas datasets as references for identification of disease-associated cell states (see [manuscript]()).
+This repository contains notebooks and scripts to reproduce analyses benchmarking the use of control and atlas datasets as references for identification of disease-associated cell states (see [manuscript](https://doi.org/10.1101/2022.11.10.515939)).
 
 The workflow for disease-state identification and evaluation of out-of-reference detection is available as a [python package](https://github.com/emdann/oor_benchmark). 
 
@@ -34,7 +34,7 @@ For COVID-19 analysis
 
 ## Citation
 
-> Coming soon
+> Dann E., Teichmann S.A. and Marioni J.C. Precise identification of cell states altered in disease with healthy single-cell references. biorXiv https://doi.org/10.1101/2022.11.10.515939
 
 ## Contact
 
