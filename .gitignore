@@ -2,7 +2,6 @@ data/
 .vscode
 *.err
 *.out
-_misc/
 _old/
 
 # Byte-compiled / optimized / DLL files
