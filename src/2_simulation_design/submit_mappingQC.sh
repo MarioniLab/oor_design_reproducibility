@@ -7,7 +7,7 @@ outdir=/lustre/scratch117/cellgen/team205/ed6/PBMC_CZI_integration_filtered/tmp/
 h5ad_files=$(ls $outdir/qPBMC_500cells_demo_perturb_cell_type*/ar_design.h5ad)
 
 for s in $h5ad_files; do
-    python run_mappingQC.py $s; 
+    python run_mappingQC_labels.py $s; 
     done
 
 for s in $h5ad_files; do
