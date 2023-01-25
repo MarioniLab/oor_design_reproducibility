@@ -49,10 +49,11 @@ def _read_file(normal_sample_obs, d,
     s_obs = adata.obs_names[adata.obs['sample_id'].isin(
         normal_sample_obs.index)]
     if n_cells_sample != None:
-        obs_df = adata.obs.loc[s_obs]
-        obs_df['sample_id'] = obs_df['sample_id'].astype('str')
-        s_obs = obs_df[['sample_id']].groupby(
-            'sample_id').sample(n_cells_sample).index
+        if s_obs.shape[0] > n_cells_sample:
+            obs_df = adata.obs.loc[s_obs]
+            obs_df['sample_id'] = obs_df['sample_id'].astype('str')
+            s_obs = obs_df[['sample_id']].groupby(
+                'sample_id').sample(n_cells_sample).index
 
     # Store raw counts in adata.X
     if not adata.raw is None:
