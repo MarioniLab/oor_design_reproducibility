@@ -46,6 +46,9 @@ parser.add_argument("--query_dataset",
 parser.add_argument("--split_seed",
                     default=2022,
                     help="ID of query batch")
+parser.add_argument("--n_cells_subsample",
+                    default=500,
+                    help="Number of cells per donor (approx)")
 parser.add_argument("--outpath",
                     default='/nfs/team205/ed6/data/PBMC_CZI_integration_filtered/tmp/',
                     help="path to working directory")
@@ -64,6 +67,7 @@ annotation_col = args.annotation_col
 batch_col = args.batch_col
 query_dataset = args.query_dataset
 split_seed = args.split_seed
+n_cells_subsample = args.n_cells_subsample
 outdir = args.outpath
 if args.testing:
     m_epochs = 10
@@ -92,7 +96,7 @@ adata = simulate_query_reference(
 assert check_dataset(adata)
 
 # Save intermediate files
-sim_id = f"qPBMC_500cells_demo_perturb_{annotation_col}{clean_pop_name('-'.join(perturb_pop))}_queryBatchdataset_id{query_dataset}_seed{split_seed}"
+sim_id = f"qPBMC_{n_cells_subsample}cells_demo_perturb_{annotation_col}{clean_pop_name('-'.join(perturb_pop))}_queryBatchdataset_id{query_dataset}_seed{split_seed}"
 if not os.path.exists(outdir + sim_id):
     os.mkdir(outdir + sim_id)
 

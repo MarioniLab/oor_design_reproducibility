@@ -44,7 +44,10 @@ def harmonize_output(adata, signif_alpha=0.1):
 def read_oor_design_output(simdir, ref_design, embedding_method, diff_method, population_obs):
     perturb_pop = simdir.split(population_obs)[1].split('_queryBatch')[0]
     print(f'Reading {perturb_pop}\n')
-    h5ad_file = simdir + f'/{ref_design}_design.{embedding_method}_{diff_method}.h5ad'
+    if ref_design == 'AR' and embedding_method == 'scArches' and diff_method == 'milo': 
+        h5ad_file = simdir + f'/ar_design.h5ad'
+    else:
+        h5ad_file = simdir + f'/{ref_design}_design.{embedding_method}_{diff_method}.h5ad'
     if diff_method == 'milo':
         try:
             adata = milopy.utils.read_milo_adata(
@@ -62,7 +65,7 @@ def read_oor_design_output(simdir, ref_design, embedding_method, diff_method, po
     return(adata)
 
 def parse_design(adata, ref_design):
-    if 'OOR_state' not in adata.obs:
+    if 'sample_adata' not in adata.uns:
         harmonize_output(adata)
     perturb_pop = adata.obs['OOR_state_name'].unique()[0]
     tpr_df = FDR_TPR_FPR.FDR_TPR_FPR(adata)
