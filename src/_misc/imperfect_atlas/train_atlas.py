@@ -22,5 +22,6 @@ outdir = args.outdir
 adata = sc.read_h5ad(outdir + h5ad_file)
 adata.obs['dataset_group'] = 'atlas'
 
+adata.obs['sample_id'] = adata.obs['donor'].astype("str") + "_" + adata.obs['method'].astype('str')
 embedding_scvi(adata, n_hvgs = 5000, outdir=outdir, batch_key="sample_id", train_params={'max_epochs':400})
 adata.write_h5ad(outdir + h5ad_file.replace('.h5ad', '_scvi.h5ad'))
