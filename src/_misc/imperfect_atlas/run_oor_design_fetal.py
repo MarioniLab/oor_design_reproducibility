@@ -33,12 +33,12 @@ design = args.design
 def run(
     adata: AnnData,
     embedding_reference: str = "atlas",
-    sample_col: str = "sample_id",
+    sample_col: str = "batch",
     annotation_col: str = "cell_type_clean",
     signif_alpha: float = 0.1,
     outdir: str = None,
     harmonize_output: bool = False,
-    milo_design: str = "~ is_query",
+    milo_design: str = "~chemistry+is_query",
     **kwargs,
     ):
     
@@ -67,7 +67,7 @@ def run(
         X_scVI_q = pd.DataFrame(vae_q.get_latent_representation(), index=vae_q.adata.obs_names)
         adata.obsm["X_scVI"] = X_scVI_q.loc[adata.obs_names].values
     else:
-        embedding_scvi(adata, n_hvgs = 5000, outdir=outdir, batch_key="sample_id", train_params={'max_epochs':400})
+        embedding_scvi(adata, n_hvgs = 5000, outdir=outdir, batch_key="batch", train_params={'max_epochs':400})
 
     # Make KNN graph for Milo neigbourhoods
     n_controls = adata[adata.obs["dataset_group"] == diff_reference].obs[sample_col].unique().shape[0]
@@ -101,8 +101,9 @@ diff_reference_assignment = {
 
 adata = sc.read_h5ad(h5ad_path)
 outdir = '/'.join(h5ad_path.split('/')[:-1]) + '/'
+adata.layers['counts'] = adata.X.copy()
 adata = run(adata, 
              embedding_reference = emb_reference_assignment[design], 
              outdir = outdir)
 
-write_milo_adata(outdir + '{design}_design.h5ad')
+write_milo_adata(adata, outdir + f'/{design}_design.h5ad')

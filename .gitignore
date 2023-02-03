@@ -3,6 +3,9 @@ data/
 *.err
 *.out
 _old/
+*.pdf
+*.txt
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

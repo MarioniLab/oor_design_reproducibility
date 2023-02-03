@@ -2,7 +2,7 @@ import os
 import numpy as np
 import scanpy as sc
 from oor_benchmark.api import check_dataset
-from oor_benchmark.methods import scArches_milo
+from oor_benchmark.methods import scArches_milo, scVI_milo
 from oor_benchmark.metrics.utils import make_OOR_per_group
 from oor_benchmark.metrics.FDR_TPR_FPR import FDR_TPR_FPR
 from oor_benchmark.metrics.auprc import auprc
@@ -46,7 +46,7 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
         os.mkdir(outdir)
 
     # Load query and control data
-    adata_merge = sc.read_h5ad(sim_dir + 'acr_design.h5ad')
+    adata_merge = sc.read_h5ad(sim_dir + 'ACR_design.scArches_milo.h5ad')
 
     # Control for collection site when subsampling controls in Stephenson
     adata_merge.obs["Site"] = adata_merge.obs.donor_id.str[0:4]
@@ -72,16 +72,25 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
 
     assert check_dataset(adata_merge)
 
-    # ## --- CR design joint --- ##
-    # adata_jointPC = adata_merge.copy()
-    # adata_jointPC_train = adata_merge.copy()
-    # filter_genes_scvi(adata_jointPC_train)
-
-    # # Train model
-    # vae_ref = diff2atlas.model_wrappers.train_scVI(
-    #     adata_jointPC_train, outdir + f"/model_ctrlquery_joint/", batch_key='sample_id')
-
-    # adata_jointPC.obsm['X_scVI'] = vae_ref.get_latent_representation()
+    ## --- CR design joint --- ##
+    cr_scvi_adata = adata_merge.copy()
+    if 'X_scVI' in cr_scvi_adata.obsm:
+        del cr_scvi_adata.obsm['X_scVI']
+    cr_scvi_adata = scVI_milo.scVI_ctrl_milo_ctrl(
+        cr_scvi_adata,
+        train_params={'max_epochs': 400},
+        outdir=outdir,
+        harmonize_output=True,
+        milo_design='~Site+is_query'
+    )
+    make_OOR_per_group(cr_scvi_adata)
+    cr_res_df = pd.concat([FDR_TPR_FPR(cr_scvi_adata), auprc(cr_scvi_adata)], 1)
+    cr_res_df['OOR_state'] = oor_ct
+    cr_res_df['n_ctrls'] = n_controls
+    cr_res_df['random_seed'] = random_seed
+    cr_res_df['ref_design'] = "CR"
+    cr_res_df['emb_method'] = "scVI"
+    cr_res_df.to_csv(outdir + 'CR_scVI_results.csv')
 
     ## --- CR design with mapping --- ##
     cr_adata = adata_merge.copy()
@@ -101,12 +110,13 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
     cr_res_df['n_ctrls'] = n_controls
     cr_res_df['random_seed'] = random_seed
     cr_res_df['ref_design'] = "CR"
-    cr_res_df.to_csv(outdir + 'CR_results.csv')
+    cr_res_df['emb_method'] = "scArches"
+    cr_res_df.to_csv(outdir + 'CR_scArches_results.csv')
 
     ## -- ACR design -- ##
     acr_adata = adata_merge.copy()
-    sc.pp.neighbors(acr_adata, use_rep="X_scVI",
-                    n_neighbors=(n_controls + n_querys) * 5)
+    k = min([(n_controls + n_querys) * 5, 200])
+    sc.pp.neighbors(acr_adata, use_rep="X_scVI", n_neighbors=k)
     scArches_milo.run_milo(acr_adata, "query", 'ctrl',
                            annotation_col=annotation_col,
                            design='~Site+is_query'
@@ -128,7 +138,8 @@ def main(sim_dir, n_controls, n_querys, random_seed, annotation_col):
     acr_res_df['n_ctrls'] = n_controls
     acr_res_df['random_seed'] = random_seed
     acr_res_df['ref_design'] = "ACR"
-    acr_res_df.to_csv(outdir + 'ACR_results.csv')
+    acr_res_df['emb_method'] = "scArches"
+    acr_res_df.to_csv(outdir + 'ACR_scArches_results.csv')
 
 
 main(args.sim_dir, args.n_controls, args.n_querys,
