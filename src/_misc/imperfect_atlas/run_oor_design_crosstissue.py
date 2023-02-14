@@ -35,15 +35,24 @@ design = args.design
 def run(
     adata: AnnData,
     reference: str = "atlas",
-    sample_col: str = "batch",
+    sample_col: str = "sample_id",
     annotation_col: str = "cell_type_clean",
     signif_alpha: float = 0.1,
     outdir: str = None,
     harmonize_output: bool = False,
-    milo_design: str = "~chemistry+is_query",
+    milo_design: str = "~is_query",
     **kwargs,
     ):
-    
+
+    surgery_epochs = 400
+    train_kwargs_surgery = {
+            "early_stopping": True,
+            "early_stopping_monitor": "elbo_train",
+            "early_stopping_patience": 10,
+            "early_stopping_min_delta": 0.001,
+            "plan_kwargs": {"weight_decay": 0.0},
+        }
+        
     diff_reference = "ctrl"
 
     # Subset to datasets of interest
@@ -53,32 +62,34 @@ def run(
         raise ValueError(f"Differential analysis reference '{diff_reference}' not found in adata.obs['dataset_group']")
 
     adata = adata[adata.obs.sort_values("dataset_group").index].copy()
-    adata.obs['dataset'] = 'Kaminski2020'
+    adata.obs['dataset'] = adata.obs['Subject_Identity'].copy()
 
     # Latent embedding
     if reference == 'HLCA':
-        hubmodel = HubModel.pull_from_huggingface_hub("scvi-tools/human-lung-cell-atlas")
-        model = hubmodel.model
+        model = scvi.model.SCANVI.load('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/HLCA_model_huggingface')
 
-        adata = adata.copy()
+        adata_query = adata.copy()
         scvi.model.SCANVI.prepare_query_anndata(adata_query, model)
         adata_query.obs["scanvi_label"] = "unlabeled"
-        query_model = scvi.model.SCANVI.load_query_data(query_data, model)
-
-        surgery_epochs = 400
-        train_kwargs_surgery = {
-            "early_stopping": True,
-            "early_stopping_monitor": "elbo_train",
-            "early_stopping_patience": 10,
-            "early_stopping_min_delta": 0.001,
-            "plan_kwargs": {"weight_decay": 0.0},
-        }
+        query_model = scvi.model.SCANVI.load_query_data(adata_query, model)
 
         query_model.train(max_epochs=surgery_epochs, **train_kwargs_surgery)
         query_model.save('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/model_fit_query2hlca', overwrite=True)
         adata.obsm['X_scVI'] = query_model.get_latent_representation()
     elif reference == 'TabulaSapiens':
-        print('in progress')
+        model = scvi.model.SCVI.load('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/model_atlas')
+        model.adata.var['ensID_train'] = [x[0] for x in model.adata.var_names.str.split('.')]
+        model.adata.var_names = model.adata.var['ensID_train'].copy()
+        
+        adata_query = adata.copy()
+        scvi.model.SCVI.prepare_query_anndata(adata_query, model)
+        adata_query.obs["scanvi_label"] = "unlabeled"
+        adata_query.obs["donor"] = adata_query.obs["Subject_Identity"].copy()
+        query_model = scvi.model.SCVI.load_query_data(adata_query, model)
+
+        query_model.train(max_epochs=surgery_epochs, **train_kwargs_surgery)
+        query_model.save('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/model_fit_query2ts', overwrite=True)
+        adata.obsm['X_scVI'] = query_model.get_latent_representation()
     else:
         embedding_scvi(adata, n_hvgs = 2000, outdir=outdir, batch_key="dataset", train_params={'max_epochs':400})
 

@@ -7,7 +7,7 @@ import scanpy as sc
 
 from oor_benchmark.api import check_dataset
 from oor_benchmark.datasets.simulation import simulate_query_reference
-from oor_benchmark.methods import scArches_milo, scArches_meld, scVI_milo, scArches_cna
+from oor_benchmark.methods import scArches_milo, scArches_meld, scArches_cna, scVI_milo, scVI_meld, scVI_cna
 from milopy.utils import write_milo_adata
 
 # --- Utils ---
@@ -129,13 +129,23 @@ elif diff_method == 'meld':
         'harmonize_output':True,
     }
     save_output = _write_adata
-    run_workflow = scArches_meld.scArches_meld
+    if embedding_method == 'scArches':
+        run_workflow = scArches_meld.scArches_meld
+    elif embedding_method == 'scVI':
+        run_workflow = scVI_meld.scVI_meld
+    else:
+        raise ValueError("Unknown embedding method (must be one of scVI/scArches)")
 elif diff_method == 'cna':
     workflow_params = {
         'harmonize_output':True,
     }
     save_output = _write_adata
-    run_workflow = scArches_cna.scArches_cna
+    if embedding_method == 'scArches':
+        run_workflow = scArches_cna.scArches_cna
+    elif embedding_method == 'scVI':
+        run_workflow = scVI_cna.scVI_cna
+    else:
+        raise ValueError("Unknown embedding method (must be one of scVI/scArches)")
 else:
     raise ValueError("Unknown differential analysis method (must be one of milo/meld/cna)")
 

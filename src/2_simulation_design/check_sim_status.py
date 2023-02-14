@@ -20,10 +20,9 @@ def _check_output(diff_method, emb_method, n='500'):
 
 
 n=500
-for diff_method in diff_methods:
-    _check_output(diff_method, emb_method='scArches', n = n)
 for m in emb_methods:
-    _check_output(diff_method = 'milo', emb_method=m, n = n)
+    for diff_method in diff_methods:
+        _check_output(diff_method, emb_method=m, n = n)
 
 n=1000
 # for diff_method in diff_methods:
