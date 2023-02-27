@@ -12,7 +12,9 @@ The workflow for disease-state identification and evaluation of out-of-reference
   - `1_PBMC_data_preprocessing/` - preprocessing and harmonization of PBMC dataset
   - `2_simulation_design/` - out-of-reference detection benchmark on simulations
   - `3_simulation_ctrl_atlas_size` - out-of-reference detection robustness to atlas and control dataset size
+  - `3b_crosstissue_atlas` - out-of-reference detection robustness with tissue-matched or cross-tissue atlas
   - `4_COVID_design` - reference design comparison on COVID-19 dataset 
+  - `5_IPF_HLCA_design` - reference design comparison on IPF lung dataset
 
 ## Data
 
