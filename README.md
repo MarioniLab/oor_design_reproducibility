@@ -27,7 +27,7 @@ Processed datasets and scVI models used in this analysis are available via [figs
 
 For simulation analysis
 - `PBMC_merged.normal.subsample500cells.clean_celltypes.h5ad` - harmonized object of healthy PBMC profiles from 13 studies, used for OOR identification benchmark with simulations
-- `model_PBMC_merged.normal.subsample500cells.zip` - scVI model trained on healthy PBMC profiles (used for joint annotation) 
+- `model_PBMC_merged.normal.subsample500cells.zip` - scVI model trained on healthy PBMC profiles (used for joint annotation) (trained with scvi-tools v0.16.2, see [notebooks](https://github.com/MarioniLab/oor_design_reproducibility/blob/master/src/1_PBMC_data_preprocessing/20220601_PBMC_scVI.ipynb) for training parameters)
 
 For COVID-19 analysis
 - `PBMC_COVID.subsample500cells.atlas.h5ad` - atlas dataset (PBMCs from healthy individuals from 12 studies)
@@ -37,7 +37,19 @@ For COVID-19 analysis
 - `PBMC_COVID.subsample500cells.design.query_PC_refA.post_milo.nhood_adata.h5ad` - ACR design processed object with Milo results (nhood AnnData)
 - `PBMC_COVID.subsample500cells.design.query_P_refC.post_milo.h5ad` - CR design processed object with Milo results (load with [`milopy.utils.read_milo_adata`](https://milopy.readthedocs.io/en/latest/autoapi/milopy/utils/index.html#milopy.utils.read_milo_adata)).
 - `PBMC_COVID.subsample500cells.design.query_P_refC.post_milo.nhood_adata.h5ad` - CR design processed object with Milo results (nhood AnnData)
-- `model_COVID19_reference_atlas_scvi0.16.2` - scVI model trained on atlas dataset (used for ACR design)
+- `model_COVID19_reference_atlas_scvi0.16.2.zip` - scVI model trained on atlas dataset (used for ACR design) (trained with scvi-tools v0.16.2, see [script](https://github.com/MarioniLab/oor_design_reproducibility/blob/master/src/4_COVID_design/COVID_train_references.py) for training parameters)
+
+For IPF analysis
+- `IPF_HLCA.ACR_design.post_milo.h5ad` - ACR design processed object with Milo results (load with [`milopy.utils.read_milo_adata`](https://milopy.readthedocs.io/en/latest/autoapi/milopy/utils/index.html#milopy.utils.read_milo_adata)). Includes annotation of aberrant basal-like states (`adata.obs['basal_like_annotation']`)
+- `IPF_HLCA.ACR_design.post_milo.nhood_adata.h5ad` - ACR design processed object with Milo results (nhood AnnData)
+- `IPF_HLCA.CR_design.post_milo.h5ad` - CR design processed object with Milo results (load with [`milopy.utils.read_milo_adata`](https://milopy.readthedocs.io/en/latest/autoapi/milopy/utils/index.html#milopy.utils.read_milo_adata)).
+- `IPF_HLCA.CR_design.post_milo.nhood_adata.h5ad` - CR design processed object with Milo results (nhood AnnData)
+- `IPF_HLCA.AR_design.post_milo.h5ad` - AR design processed object with Milo results (load with [`milopy.utils.read_milo_adata`](https://milopy.readthedocs.io/en/latest/autoapi/milopy/utils/index.html#milopy.utils.read_milo_adata)).
+- `IPF_HLCA.AR_design.post_milo.nhood_adata.h5ad` - AR design processed object with Milo results (nhood AnnData)
+
+
+For cross-tissue atlas analysis
+- `model_TabulaSapiens_scvi0.20.0.zip` - scVI model trained on Tabula Sapiens dataset (trained with scvi-tools v0.20.0, see [script](https://github.com/MarioniLab/oor_design_reproducibility/blob/revision-1.0/src/3b_crosstissue_atlas/train_atlas.py) for training parameters)
 
 ## Citation
 
