@@ -44,7 +44,13 @@ def embedding_fixed_hvgs(adata_merge, train_vars, emb_method, ref_dataset=None, 
         ref_outdir = outdir + f"/model_{ref_dataset}/"
     else:
         ref_outdir = None
-    vae_ref = _train_scVI(adata_ref_train, outfile=ref_outdir, train_params=train_params, **kwargs)
+    try:
+        vae_ref = scvi.model.SCVI.load(ref_outdir)
+        assert vae_ref.adata.obs_names.isin(
+                    adata_ref_train.obs_names
+                ).all()
+    except:
+        vae_ref = _train_scVI(adata_ref_train, outfile=ref_outdir, train_params=train_params, **kwargs)
 
     # Fit query data to scVI model
     if emb_method == 'scArches':
@@ -53,16 +59,22 @@ def embedding_fixed_hvgs(adata_merge, train_vars, emb_method, ref_dataset=None, 
             q_outdir = outdir + f"/model_fit_query2{ref_dataset}/"
         else:
             q_outdir = None
-        vae_q = _fit_scVI(vae_ref, adata_query_fit, train_params=train_params, outfile=q_outdir)
+        try:
+            vae_q = scvi.model.SCVI.load(q_outdir)
+            assert vae_q.adata.obs_names.isin(
+                    adata_query_fit.obs_names
+                ).all()
+        except:
+            vae_q = _fit_scVI(vae_ref, adata_query_fit, train_params=train_params, outfile=q_outdir)
 
-    # Get latent embeddings
+        # Get latent embeddings
         X_scVI_ref = pd.DataFrame(vae_ref.get_latent_representation(), index=vae_ref.adata.obs_names)
         X_scVI_q = pd.DataFrame(vae_q.get_latent_representation(), index=vae_q.adata.obs_names)
         X_scVI = pd.concat([X_scVI_q, X_scVI_ref], axis=0)
     else:
         X_scVI = pd.DataFrame(vae_ref.get_latent_representation(), index=vae_ref.adata.obs_names)
     adata_merge.obsm["X_scVI"] = X_scVI.loc[adata_merge.obs_names].values
-
+    
 def run_hvg_comparison(
     simdir,
     design = 'CR',
@@ -114,7 +126,7 @@ def run_hvg_comparison(
     # Make KNN graph for Milo neigbourhoods
     n_controls = adata[adata.obs["dataset_group"] == diff_reference].obs['sample_id'].unique().shape[0]
     n_querys = adata[adata.obs["dataset_group"] == "query"].obs['sample_id'].unique().shape[0]
-    #  Set max to 200 or memory explodes for large datasets
+    #  Set max to 200 or memory explodes for large datasets
     k = min([(n_controls + n_querys) * 5, 200])
     sc.pp.neighbors(adata, use_rep="X_scVI", n_neighbors=k)
 

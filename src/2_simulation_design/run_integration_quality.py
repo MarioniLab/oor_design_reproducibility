@@ -24,13 +24,15 @@ else:
     b = True
 
 acr_adata = milopy.utils.read_milo_adata(
-    simdir + '/acr_design.h5ad', backed=b)
+    simdir + '/ACR_design.scArches_milo.h5ad', backed=b)
 ar_adata = milopy.utils.read_milo_adata(
     simdir + '/ar_design.h5ad', backed=b)
 cr_adata = milopy.utils.read_milo_adata(
-    simdir + '/cr_design.h5ad', backed=b)
+    simdir + '/CR_design.scArches_milo.h5ad', backed=b)
+cr_scvi_adata = milopy.utils.read_milo_adata(
+    simdir + '/CR_design.scVI_milo.h5ad', backed=b)
 ct = acr_adata.obs[acr_adata.obs['OOR_state'] == 1]['cell_type'].unique()[0]
-design_dict = {'CR': cr_adata, 'ACR': acr_adata, 'AR': ar_adata}
+design_dict = {'CR scArches': cr_adata,'CR scVI': cr_scvi_adata, 'ACR': acr_adata, 'AR': ar_adata}
 if filter_dataset is not None:
     for d in design_dict:
         if any(design_dict[d].obs['dataset_group'] == filter_dataset):
