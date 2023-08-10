@@ -24,8 +24,6 @@ disease_condition = args.disease_condition
 n_cells_sample = args.n_cells_sample
 
 # Load dataset
-
-
 def _read_file(normal_sample_obs, d,
                n_cells_sample=500,
                sample_obs_columns=['sex', 'tissue', 'ethnicity', 'disease', 'assay',
@@ -49,10 +47,16 @@ def _read_file(normal_sample_obs, d,
     s_obs = adata.obs_names[adata.obs['sample_id'].isin(
         normal_sample_obs.index)]
     if n_cells_sample != None:
-        obs_df = adata.obs.loc[s_obs]
-        obs_df['sample_id'] = obs_df['sample_id'].astype('str')
-        s_obs = obs_df[['sample_id']].groupby(
-            'sample_id').sample(n_cells_sample).index
+        s_obs = pd.Series() 
+        for s in adata.obs['sample_id'].unique():
+            s_obs_i = adata.obs_names[adata.obs['sample_id'] == s]
+            if s_obs_i.shape[0] > n_cells_sample:
+                obs_df = adata.obs.loc[s_obs_i]
+                obs_df['sample_id'] = obs_df['sample_id'].astype('str')
+                s_obs_i = obs_df[['sample_id']].groupby(
+                    'sample_id').sample(n_cells_sample).index
+            s_obs = pd.concat([s_obs, pd.Series(s_obs_i)])
+        s_obs = s_obs.values
 
     # Store raw counts in adata.X
     if not adata.raw is None:

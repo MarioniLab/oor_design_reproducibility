@@ -2,8 +2,11 @@ data/
 .vscode
 *.err
 *.out
-_misc/
 _old/
+*.pdf
+*.txt
+figures/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

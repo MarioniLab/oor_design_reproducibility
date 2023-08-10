@@ -1,0 +1,154 @@
+﻿Gene,Desc,T.stat,Adj.p
+ZMAT3,"zinc finger, matrin type 3",14.91795795,7.80E-06
+BTNL8,butyrophilin-like 8,-11.14400908,0.000166763
+CACNB3,"calcium channel, voltage-dependent, beta 3 subunit",11.03664329,0.000166763
+CRIP1,cysteine-rich protein 1 (intestinal),10.49429807,0.000197606
+PSD3,pleckstrin and Sec7 domain containing 3,10.4892907,0.000197606
+TTC3,tetratricopeptide repeat domain 3,10.34494261,0.000197953
+PSD3,pleckstrin and Sec7 domain containing 3,10.0432539,0.00022895
+ETNK1,ethanolamine kinase 1,-10.01128857,0.00022895
+MDK,midkine (neurite growth-promoting factor 2),9.805402501,0.000267333
+FNDC1,fibronectin type III domain containing 1,9.637039921,0.00030169
+PDGFRA,"platelet-derived growth factor receptor, alpha polypeptide",-9.127249908,0.000554131
+GRB10,growth factor receptor-bound protein 10,-8.885049138,0.000713583
+SERPINA3,"serpin peptidase inhibitor, clade A (alpha-1 antiproteinase, antitrypsin), member 3",-8.83225865,0.000713583
+MAOA,monoamine oxidase A,-8.723480869,0.000775521
+C16orf72,chromosome 16 open reading frame 72,-8.578854779,0.000894134
+C11orf80,chromosome 11 open reading frame 80,8.358389379,0.001143683
+L3MBTL,l(3)mbt-like (Drosophila),8.328695741,0.001143683
+TMTC1,transmembrane and tetratricopeptide repeat containing 1,-8.158063878,0.001397488
+IL1R2,"interleukin 1 receptor, type II",-8.060340638,0.001504816
+ANTXR1,anthrax toxin receptor 1,8.028613418,0.001504816
+AKAP12,A kinase (PRKA) anchor protein 12,-8.008865586,0.001504816
+PHLDA3,"pleckstrin homology-like domain, family A, member 3",7.953859659,0.001563549
+NSUN5B,"NOL1/NOP2/Sun domain family, member 5B",7.888292549,0.00165548
+NSUN5C,"NOL1/NOP2/Sun domain family, member 5C",7.83172422,0.001657454
+ECM2,"extracellular matrix protein 2, female organ and adipocyte specific",7.761825057,0.001657454
+EVI1,ecotropic viral integration site 1,7.76062659,0.001657454
+JHDM1D,jumonji C domain containing histone demethylase 1 homolog D (S. cerevisiae),-7.757075177,0.001657454
+HCRP1,hepatocellular carcinoma-related HCRP1,7.729439954,0.001657454
+RNF150,ring finger protein 150,7.722156664,0.001657454
+PDE4D,"phosphodiesterase 4D, cAMP-specific (phosphodiesterase E3 dunce homolog, Drosophila)",-7.717666895,0.001657454
+C5orf13,chromosome 5 open reading frame 13,7.668838184,0.001732479
+PLXDC1,plexin domain containing 1,7.610818437,0.001802053
+ZNF423,zinc finger protein 423,7.558697762,0.001802053
+TTC3,tetratricopeptide repeat domain 3,7.538238155,0.001802053
+CXCL12,chemokine (C-X-C motif) ligand 12 (stromal cell-derived factor 1),7.53026884,0.001802053
+IL18RAP,interleukin 18 receptor accessory protein,-7.529919432,0.001802053
+PTGFRN,prostaglandin F2 receptor negative regulator,7.522852867,0.001802053
+MTSS1,metastasis suppressor 1,-7.513929958,0.001802053
+HIST1H1T,"histone cluster 1, H1t",-7.484499334,0.001802053
+IL1R2,"interleukin 1 receptor, type II",-7.470098625,0.001802053
+LPPR4,plasticity related gene 1,7.468763424,0.001802053
+GRB10,growth factor receptor-bound protein 10,-7.375543478,0.002009309
+TSPAN11,tetraspanin 11,7.371774068,0.002009309
+AASS,aminoadipate-semialdehyde synthase,-7.356528369,0.002012771
+TYMS,thymidylate synthetase,7.321076636,0.002055597
+ZNF33A,zinc finger protein 33A,-7.301198749,0.002055597
+RFFL,ring finger and FYVE-like domain containing 1,-7.279642754,0.002055597
+FAM19A2,"family with sequence similarity 19 (chemokine (C-C motif)-like), member A2",-7.278217531,0.002055597
+ZNF260,zinc finger protein 260,7.266909896,0.002055597
+SLC25A37,"solute carrier family 25, member 37",-7.265067757,0.002055597
+CCL26,chemokine (C-C motif) ligand 26,-7.244896314,0.002082876
+TM7SF3,transmembrane 7 superfamily member 3,7.230547721,0.002091388
+CACNB3,"calcium channel, voltage-dependent, beta 3 subunit",7.205521008,0.002128846
+SDR16C5,"short chain dehydrogenase/reductase family 16C, member 5",-7.196726252,0.002128846
+FMO5,flavin containing monooxygenase 5,-7.153570236,0.002211845
+PPP2R5E,"protein phosphatase 2, regulatory subunit B', epsilon isoform",7.141307429,0.002211845
+CDCP1,CUB domain containing protein 1,7.140667108,0.002211845
+ZNF573,zinc finger protein 573,7.102713271,0.002261994
+IDI1,isopentenyl-diphosphate delta isomerase 1,-7.102146966,0.002261994
+FAM107A,"family with sequence similarity 107, member A",-7.096085547,0.002261994
+NUDT16,nudix (nucleoside diphosphate linked moiety X)-type motif 16,-7.072843404,0.002277742
+TIMP4,TIMP metallopeptidase inhibitor 4,-7.072124815,0.002277742
+C7orf53,chromosome 7 open reading frame 53,-7.053343441,0.00231127
+TMTC1,transmembrane and tetratricopeptide repeat containing 1,-7.030177584,0.00231127
+RPS27L,ribosomal protein S27-like,7.029883705,0.00231127
+ITGB8,"integrin, beta 8",7.025736028,0.00231127
+CDCA7,cell division cycle associated 7,6.940700884,0.002624535
+TCEAL7,transcription elongation factor A (SII)-like 7,6.91612733,0.002663978
+NCOA3,nuclear receptor coactivator 3,-6.905753945,0.002663978
+PEX12,peroxisomal biogenesis factor 12,6.905742319,0.002663978
+ADRBK2,"adrenergic, beta, receptor kinase 2",6.871873799,0.002717353
+TRADD,TNFRSF1A-associated via death domain,6.86800005,0.002717353
+TSHZ2,teashirt zinc finger homeobox 2,6.862263738,0.002717353
+SMARCC1,"SWI/SNF related, matrix associated, actin dependent regulator of chromatin, subfamily c, member 1",6.855588055,0.002717353
+CFH,complement factor H,6.846407847,0.002717353
+PHPT1,phosphohistidine phosphatase 1,6.845204842,0.002717353
+IDI1,isopentenyl-diphosphate delta isomerase 1,-6.816678746,0.00277565
+ENC1,ectodermal-neural cortex (with BTB-like domain),6.815101995,0.00277565
+SUPT7L,suppressor of Ty 7 (S. cerevisiae)-like,6.809551354,0.00277565
+LRRC17,leucine rich repeat containing 17,6.800168562,0.00277565
+HGSNAT,heparan-alpha-glucosaminide N-acetyltransferase,6.791497657,0.00277565
+MAOA,monoamine oxidase A,-6.779967582,0.00277565
+MAMLD1,mastermind-like domain containing 1,-6.775440932,0.00277565
+ABCC3,"ATP-binding cassette, sub-family C (CFTR/MRP), member 3",6.770613465,0.00277565
+INSIG1,insulin induced gene 1,-6.766681126,0.00277565
+KIAA0895L,KIAA0895-like,6.759418451,0.002777486
+FLJ22536,hypothetical locus LOC401237,6.744831386,0.002793902
+TTC3,tetratricopeptide repeat domain 3,6.736413453,0.002793902
+CXXC5,CXXC finger 5,6.735831056,0.002793902
+AFF2,"AF4/FMR2 family, member 2",-6.683853931,0.003019463
+AOX1,aldehyde oxidase 1,-6.652434218,0.003136348
+ABCC13,"ATP-binding cassette, sub-family C (CFTR/MRP), member 13",-6.648885255,0.003136348
+ARG1,"arginase, liver",-6.63219257,0.003192898
+ROBO2,"roundabout, axon guidance receptor, homolog 2 (Drosophila)",6.604168252,0.003304645
+LMCD1,LIM and cysteine-rich domains 1,-6.599850802,0.003304645
+ASPN,asporin,6.585317926,0.003309494
+COL3A1,"collagen, type III, alpha 1",6.577840889,0.003309494
+COL8A2,"collagen, type VIII, alpha 2",6.576017339,0.003309494
+BCL6,B-cell CLL/lymphoma 6,-6.574233776,0.003309494
+NAPEPLD,N-acyl phosphatidylethanolamine phospholipase D,6.569280644,0.003309494
+DDB2,"damage-specific DNA binding protein 2, 48kDa",6.559613469,0.003331944
+C5orf13,chromosome 5 open reading frame 13,6.54937337,0.003358246
+FOXO1,forkhead box O1,-6.539131187,0.003385141
+ZNF260,zinc finger protein 260,6.525837587,0.003430725
+SSPN,sarcospan (Kras oncogene-associated gene),6.503851607,0.003530209
+COL1A1,"collagen, type I, alpha 1",6.493938924,0.003555603
+ASPM,"asp (abnormal spindle) homolog, microcephaly associated (Drosophila)",6.48887077,0.003555603
+MZF1,myeloid zinc finger 1,6.475376975,0.003606365
+HSPA14,heat shock 70kDa protein 14,-6.466446133,0.003629288
+NFIL3,"nuclear factor, interleukin 3 regulated",-6.434037825,0.00380545
+SEPW1,"selenoprotein W, 1",6.422638986,0.003838539
+PDLIM5,PDZ and LIM domain 5,6.418106959,0.003838539
+ELL2,"elongation factor, RNA polymerase II, 2",-6.413690958,0.003838539
+ADM,adrenomedullin,-6.377536341,0.004023406
+NSUN5,"NOL1/NOP2/Sun domain family, member 5",6.374831628,0.004023406
+HISPPD2A,histidine acid phosphatase domain containing 2A,6.371892805,0.004023406
+CCNL1,cyclin L1,-6.364849733,0.004038648
+GPR97,G protein-coupled receptor 97,-6.348306148,0.004096266
+FAM65B,"family with sequence similarity 65, member B",-6.347143136,0.004096266
+ACPP,"acid phosphatase, prostate",-6.338539097,0.00412408
+ST13,suppression of tumorigenicity 13 (colon carcinoma) (Hsp70 interacting protein),6.326588167,0.004157121
+ZNF785,zinc finger protein 785,6.324618619,0.004157121
+SEPW1,"selenoprotein W, 1",6.315663232,0.004177157
+ZNF562,zinc finger protein 562,6.312664455,0.004177157
+SCARA3,"scavenger receptor class A, member 3",6.303941054,0.004207992
+ZMAT3,"zinc finger, matrin type 3",6.295579696,0.004236661
+RGS10,regulator of G-protein signaling 10,6.283153527,0.004296586
+FGF1,fibroblast growth factor 1 (acidic),6.274746075,0.004326856
+DYRK2,dual-specificity tyrosine-(Y)-phosphorylation regulated kinase 2,6.268985479,0.004337287
+NCRNA00086,non-protein coding RNA 86,6.26230321,0.004355123
+RTP4,receptor (chemosensory) transporter protein 4,6.225375674,0.004539835
+NSUN5B,"NOL1/NOP2/Sun domain family, member 5B",6.218685237,0.004539835
+IGFBP7,insulin-like growth factor binding protein 7,6.214250532,0.004539835
+GPX8,glutathione peroxidase 8 (putative),6.207926394,0.004539835
+SLC26A8,"solute carrier family 26, member 8",-6.206479884,0.004539835
+REPS2,RALBP1 associated Eps domain containing 2,-6.20482005,0.004539835
+PFKFB2,"6-phosphofructo-2-kinase/fructose-2,6-biphosphatase 2",-6.199336063,0.004539835
+SRPX,"sushi-repeat-containing protein, X-linked",-6.197222317,0.004539835
+LDLR,low density lipoprotein receptor,-6.193857554,0.004539835
+DNM2,dynamin 2,-6.193191192,0.004539835
+CEBPD,"CCAAT/enhancer binding protein (C/EBP), delta",-6.193139699,0.004539835
+SSH2,slingshot homolog 2 (Drosophila),-6.182172826,0.004540487
+ROGDI,rogdi homolog (Drosophila),6.180642712,0.004540487
+COL15A1,"collagen, type XV, alpha 1",6.179164993,0.004540487
+LSDP5,lipid storage droplet protein 5,-6.177350698,0.004540487
+SSPN,sarcospan (Kras oncogene-associated gene),6.167400725,0.004574793
+STMN1,stathmin 1/oncoprotein 18,6.16544426,0.004574793
+LRRC39,leucine rich repeat containing 39,-6.154157428,0.004606686
+LOC26010,viral DNA polymerase-transactivated protein 6,6.153977327,0.004606686
+ROBO1,"roundabout, axon guidance receptor, homolog 1 (Drosophila)",6.144612323,0.004653146
+ANO1,"anoctamin 1, calcium activated chloride channel",6.136743504,0.004687786
+,,,
+,,,
