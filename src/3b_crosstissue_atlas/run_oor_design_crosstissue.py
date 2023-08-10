@@ -66,7 +66,7 @@ def run(
 
     # Latent embedding
     if reference == 'HLCA':
-        model = scvi.model.SCANVI.load('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/HLCA_model_huggingface')
+        model = scvi.model.SCANVI.load('/lustre/scratch126/cellgen/team205/ed6/OOR_benchmark_lung/HLCA_model_huggingface')
 
         adata_query = adata.copy()
         scvi.model.SCANVI.prepare_query_anndata(adata_query, model)
@@ -74,10 +74,10 @@ def run(
         query_model = scvi.model.SCANVI.load_query_data(adata_query, model)
 
         query_model.train(max_epochs=surgery_epochs, **train_kwargs_surgery)
-        query_model.save('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/model_fit_query2hlca', overwrite=True)
+        query_model.save('/lustre/scratch126/cellgen/team205/ed6/OOR_benchmark_lung/model_fit_query2hlca', overwrite=True)
         adata.obsm['X_scVI'] = query_model.get_latent_representation()
     elif reference == 'TabulaSapiens':
-        model = scvi.model.SCVI.load('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/model_atlas')
+        model = scvi.model.SCVI.load('/lustre/scratch126/cellgen/team205/ed6/OOR_benchmark_lung/model_atlas')
         model.adata.var['ensID_train'] = [x[0] for x in model.adata.var_names.str.split('.')]
         model.adata.var_names = model.adata.var['ensID_train'].copy()
         
@@ -88,7 +88,7 @@ def run(
         query_model = scvi.model.SCVI.load_query_data(adata_query, model)
 
         query_model.train(max_epochs=surgery_epochs, **train_kwargs_surgery)
-        query_model.save('/lustre/scratch117/cellgen/team205/ed6/OOR_benchmark_lung/model_fit_query2ts', overwrite=True)
+        query_model.save('/lustre/scratch126/cellgen/team205/ed6/OOR_benchmark_lung/model_fit_query2ts', overwrite=True)
         adata.obsm['X_scVI'] = query_model.get_latent_representation()
     else:
         embedding_scvi(adata, n_hvgs = 2000, outdir=outdir, batch_key="dataset", train_params={'max_epochs':400})
