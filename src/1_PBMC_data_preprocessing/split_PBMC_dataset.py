@@ -24,8 +24,6 @@ disease_condition = args.disease_condition
 n_cells_sample = args.n_cells_sample
 
 # Load dataset
-
-
 def _read_file(normal_sample_obs, d,
                n_cells_sample=500,
                sample_obs_columns=['sex', 'tissue', 'ethnicity', 'disease', 'assay',
