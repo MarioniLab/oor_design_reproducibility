@@ -23,6 +23,10 @@ Processed datasets and scVI models used in this analysis are available via [figs
 For simulation analysis
 - `PBMC_merged.normal.subsample500cells.clean_celltypes.h5ad` - harmonized object of healthy PBMC profiles from 13 studies, used for OOR identification benchmark with simulations
 - `model_PBMC_merged.normal.subsample500cells.zip` - scVI model trained on healthy PBMC profiles (used for joint annotation) (trained with scvi-tools v0.16.2, see [notebooks](https://github.com/MarioniLab/oor_design_reproducibility/blob/master/src/1_PBMC_data_preprocessing/20220601_PBMC_scVI.ipynb) for training parameters)
+- Results from simulation analysis are shared in .csv files (`OOR_simulations_*.csv`)
+    - `*.nhood_results_all.csv` - neighbourhood level Milo results (with fraction of OOR state)
+    - `*.TPRFPRFDR_results_all.csv` - TPR/FDR/FPR for each simulation
+    - `*.AUPRC_results_all.csv` - AUPRC for each simulation
 
 For COVID-19 analysis
 - `PBMC_COVID.subsample500cells.atlas.h5ad` - atlas dataset (PBMCs from healthy individuals from 12 studies)
