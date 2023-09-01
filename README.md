@@ -1,4 +1,5 @@
-# Disease-state identification with healthy single-cell references  
+# Disease-state identification with healthy single-cell references 
+[![DOI](https://zenodo.org/badge/503372743.svg)](https://zenodo.org/badge/latestdoi/503372743)
 
 This repository contains notebooks and scripts to reproduce analyses benchmarking the use of control and atlas datasets as references for identification of disease-associated cell states (see [manuscript](https://doi.org/10.1101/2022.11.10.515939)).
 
